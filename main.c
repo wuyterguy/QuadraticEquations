@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
+#include <math.h>
 
+#define EPSILON 0.00001                     //comparison accuracy
 typedef enum {NOROOTS, ONEROOT, TWOROOTS, INFROOTS = -2} rootsc;
 
 /* CoefficientsRequest: transmit three values from input to addresses pcoef_a, pcoef_b, pcoef_c.
-Returns 1 if the number of coefficients is three or 0 otherwise*/
+Returns 1 if the number of coefficients is three or 0 otherwise. */
 int CoefficientsRequest(double* pcoef_a, double* pcoef_b, double* pcoef_c);
 
 /* QuadraticSolver: finds the solution of quadratic equation with coefficients coef_a, coef_b, coef_c
@@ -15,7 +17,7 @@ Returns the number of solutions or INFROOTS if there are infinite. */
 rootsc QuadraticSolver(double coef_a, double coef_b, double coef_c, double* proot1, double* proot2);
 
 /* PrintRoots: print roots depending on the value of nroots.
-Returns 1 if everything is correct or 0 otherwise */
+Returns 1 if everything is correct or 0 otherwise. */
 int PrintRoots(rootsc nroots, double root1, double root2);
 
 int main() {
@@ -38,6 +40,11 @@ int main() {
 
 
 int CoefficientsRequest(double* pcoef_a, double* pcoef_b, double* pcoef_c) {    //TODO any parameters count
+    assert(pcoef_a != NULL);
+    assert(pcoef_b != NULL);
+    assert(pcoef_c != NULL);
+    assert(pcoef_a != pcoef_b && pcoef_a != pcoef_c && pcoef_b != pcoef_c);
+
     printf("Quadratic equations solver by Zotov Anton\n");
     printf("Enter the coefficients coef_a, coef_b, coef_c like: 1 2 1\n");
 
@@ -47,6 +54,10 @@ int CoefficientsRequest(double* pcoef_a, double* pcoef_b, double* pcoef_c) {    
     return 0;
 }
 
+
+/* EpsPrecComparison: compare a and b.
+Returns 1 if a = b or 0 otherwise. */
+int EpsPrecComparison(double a, double b);
 
 /* LinearSolver: finds the solution of linear equation with coefficients coef_a, coef_b
 and writes them to the address proot.
@@ -61,12 +72,12 @@ rootsc QuadraticSolver(double coef_a, double coef_b, double coef_c, double* proo
     assert(proot2 != NULL);
     assert(proot1 != proot2);
 
-    if (coef_a == 0) {
+    if (EpsPrecComparison(coef_a, 0)) {
         return LinearSolver(coef_b, coef_c, proot1);
     }
     else { /* (coef_a != 0) => it's quadric education */
         double D = coef_b*coef_b - 4*coef_a*coef_c;
-        if (D == 0) {
+        if (EpsPrecComparison(D, 0)) {
             *proot1 = SmartDivision(-coef_b, 2 * coef_a);
             return ONEROOT;
         }
@@ -84,8 +95,10 @@ rootsc QuadraticSolver(double coef_a, double coef_b, double coef_c, double* proo
 
 
 rootsc LinearSolver(double coef_a, double coef_b, double* proot) {
-    if (coef_a == 0) {
-        if (coef_b == 0)
+    assert(proot != NULL);
+
+    if (EpsPrecComparison(coef_a, 0)) {
+        if (EpsPrecComparison(coef_b, 0))
             return INFROOTS;
         else /* (coef_c != 0) */
             return NOROOTS;
@@ -98,15 +111,23 @@ rootsc LinearSolver(double coef_a, double coef_b, double* proot) {
 
 
 double SmartDivision(double dividend, double divider) {
-    if (dividend != 0)
+    if (!EpsPrecComparison(dividend, 0))
         return dividend / divider;
     else
         return 0;
 }
 
 
+int EpsPrecComparison(double a, double b) {
+    if (a <= b + EPSILON && a >= b - EPSILON)
+        return 1;
+    else
+        return 0;
+}
+
+
 int PrintRoots(rootsc nroots, double root1, double root2) {    //TODO any parameters count
-    if(nroots == TWOROOTS && root1 == root2)
+    if(EpsPrecComparison(nroots, TWOROOTS) && EpsPrecComparison(root1, root2))
         nroots = ONEROOT;
 
     switch(nroots) {
@@ -117,10 +138,10 @@ int PrintRoots(rootsc nroots, double root1, double root2) {    //TODO any parame
             printf("There isn't any solution\n");
             break;
         case ONEROOT:
-            printf("There is only solution x1: %.4lf\n", root1);
+            printf("There is only solution x1: %.5lf\n", root1);
             break;
         case TWOROOTS:
-            printf("There are two solutions x1: %.4lf; x2: %.4lf\n", root1, root2);
+            printf("There are two solutions x1: %.5lf; x2: %.5lf\n", root1, root2);
             break;
         default:
             return 1;
