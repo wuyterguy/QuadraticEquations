@@ -5,7 +5,7 @@
 #define NOROOTS 0
 #define ONEROOT 0
 
-int PrintRoots(int nroots, ...) {    //TODO any parameters count
+int PrintRoots(int nroots, ...) {
     if (nroots == INFROOTS)
         printf("There is the infinity of roots\n");
     else if (nroots == NOROOTS)

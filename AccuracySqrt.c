@@ -1,15 +1,15 @@
 #include <stdio.h>
 #include <assert.h>
 
-/* AccuracyComparison: comperes a and b.
+/* AccuracyComparison: comperes a and b taking accuracy into account.
 Return -1 if a < b, 1 if a > b, 0 if a = b */
-int AccuracyComparison(double a, double b, double accuracy);
+int ImpAccuracyComparison(double a, double b, double accuracy);
 
 double AccuracySqrt(double radicand, double accuracy) {
     assert(radicand>=0);
 
-    double low, high;
-    int cmp_result = AccuracyComparison(radicand, 1.0, accuracy);
+    //double low, high;
+    int cmp_result = ImpAccuracyComparison(radicand, 1.0, accuracy);
     switch(cmp_result) {
         case 0:
             return 1;
@@ -22,9 +22,9 @@ double AccuracySqrt(double radicand, double accuracy) {
             break;
     }
 
-    double lmiddle = 0, middle;
+    double lmiddle = 0, middle = 0;
     //int k = 0;                            counter of steps
-    while (AccuracyComparison(low, high, accuracy)) {
+    while (ImpAccuracyComparison(low, high, accuracy)) {
         //k++;                              counter of steps
         middle = (high + low) / 2;
         if (middle == lmiddle) {
@@ -44,7 +44,7 @@ double AccuracySqrt(double radicand, double accuracy) {
 }
 
 
-int AccuracyComparison(double a, double b, double accuracy) {
+int ImpAccuracyComparison(double a, double b, double accuracy) {
     if (a <= b + accuracy && a >= b - accuracy)
         return 0;
     else if (a < b)
@@ -64,3 +64,9 @@ int main() {
 // ?is initialization necessary
 
 // ?space of vision in case
+
+void gg(){
+
+    static int x;
+    gg();
+}
