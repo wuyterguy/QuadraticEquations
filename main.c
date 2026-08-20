@@ -21,13 +21,13 @@ Returns 1 if everything is correct or 0 otherwise. */
 int PrintRoots(rootsc nroots, double root1, double root2);
 
 int main() {
-    double coef_a = 0, coef_b = 0, coef_c = 0;
+    double coef_a = 0.0, coef_b = 0.0, coef_c = 0.0;
     if (CoefficientsRequest(&coef_a, &coef_b, &coef_c)) {
         fprintf(stderr, "CoefficientsRequest: There must be three coefficients\n");
         return 1;
     }
 
-    double root1 = 0, root2 = 0;
+    double root1 = 0.0, root2 = 0.0;
     rootsc nroots = QuadraticSolver(coef_a, coef_b, coef_c, &root1, &root2);
 
     if (PrintRoots(nroots, root1, root2)) {
@@ -55,7 +55,7 @@ int CoefficientsRequest(double* pcoef_a, double* pcoef_b, double* pcoef_c) {    
 }
 
 
-/* EpsPrecComparison: compare a and b.
+/* EpsPrecComparison: compares a and b.
 Returns 1 if a = b or 0 otherwise. */
 int EpsPrecComparison(double a, double b);
 
