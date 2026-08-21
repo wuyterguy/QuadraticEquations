@@ -1,30 +1,9 @@
-#include <stdio.h>
-#include <math.h>
-#include <assert.h>
-#include <math.h>
-
-#define EPSILON 0.00001                     //comparison accuracy
-typedef enum {NOROOTS, ONEROOT, TWOROOTS, INFROOTS = -2} rootsc;
-
-/* CoefficientsRequest: transmit three values from input to addresses pcoef_a, pcoef_b, pcoef_c.
-Returns 1 if the number of coefficients is three or 0 otherwise. */
-int CoefficientsRequest(double* const p_coef_a, double* const p_coef_b, double* const p_coef_c);
-
-/* QuadraticSolver: finds the solution of quadratic equation with coefficients coef_a, coef_b, coef_c
-and writes them to the address proot1, proot2.
-If equation has only one solution, it will be written to addres proot1.
-Returns the number of solutions or INFROOTS if there are infinite. */
-rootsc QuadraticSolver(const double coef_a, double const coef_b, double const coef_c, double* const p_root1, double* const p_root2);
-
-/* PrintRoots: print roots depending on the value of nroots.
-Returns 1 if everything is correct or 0 otherwise. */
-int PrintRoots(rootsc nroots, const double root1, const double root2);
+#include "title.h"
 
 int main() {
     double coef_a = 0.0, coef_b = 0.0, coef_c = 0.0;
     if (CoefficientsRequest(&coef_a, &coef_b, &coef_c)) {
-        fprintf(stderr, "CoefficientsRequest: There must be three coefficients\n");
-        return 1;
+        return 0;
     }
 
     double root1 = 0.0, root2 = 0.0;
@@ -46,26 +25,45 @@ int CoefficientsRequest(double* const p_coef_a, double* const p_coef_b, double* 
     assert(p_coef_a != p_coef_b && p_coef_a != p_coef_c && p_coef_b != p_coef_c);
 
     printf("Quadratic equations solver by Zotov Anton\n");
-    printf("Enter the coefficients coef_a, coef_b, coef_c like: 1 2 1\n");
+    while(1) {                          // request the introduction of coefficients unless input is correct or program is closed
+        printf("Enter the coefficients coef_a, coef_b, coef_c like: 1 2 1\n");
 
-    if (scanf("%lf %lf %lf", p_coef_a, p_coef_b, p_coef_c) != 3)
-        return 1;
+        if (scanf("%lf %lf %lf", p_coef_a, p_coef_b, p_coef_c) != 3){
+            printf("CoefficientsRequest: There must be three coefficients\n");
+            printf("Do you want to try again? (write Y if you do or N otherwise)\n");
+
+            if(AskYesOrNo())            // answer is Y
+                continue;
+            else                        // answer is N
+                return 1;
+        }
+        else /* number of arguments is 3 => input is correct */
+            break;
+    }
 
     return 0;
 }
 
 
-/* EpsPrecComparison: compares a and b taking EPSILON as accuracy into account.
-Returns 1 if a = b or 0 otherwise. */
-int EpsPrecComparison(const double a, const double b);
+int AskYesOrNo() {
+    char answer = 0;
+    while(1) {                  // request answer unless it is correct
+        ClearInputBuf();        // clear the input buffer from excess symbols
+        scanf("%c", &answer);
+        if (answer == 'Y')
+            return 1;
+        else if (answer == 'N')
+            return 0;
+        printf("PLease write Y or N\n");
+    }
+}
 
-/* LinearSolver: finds the solution of linear equation with coefficients coef_a, coef_b
-and writes them to the address proot.
-Returns the number of solutions or INFROOTS if there are infinite. */
-rootsc LinearSolver(const double coef_a, const double coef_b, double* const p_root);
 
-/* SmartDivision: returns the quotient of dividend/divider preventing the return of -0.0 */
-double SmartDivision(const double dividend, const double divider);
+void ClearInputBuf(){
+    char c;
+    while(((c = getchar()) != EOF) && (c != '\n'));
+}
+
 
 rootsc QuadraticSolver(const double coef_a, const double coef_b, const double coef_c, double* const p_root1, double* const p_root2) {
     assert(p_root1 != NULL);
