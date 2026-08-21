@@ -1,26 +1,26 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#define INFROOTS -2
-#define NOROOTS 0
-#define ONEROOT 0
+#define INF_ROOTS -2
+#define NO_ROOTS 0
+#define ONE_ROOT 0
 
-int PrintRoots(int nroots, ...) {
-    if (nroots == INFROOTS)
+int PrintRoots(int n_roots, ...) {
+    if (n_roots == INF_ROOTS)
         printf("There is the infinity of roots\n");
-    else if (nroots == NOROOTS)
+    else if (n_roots == NO_ROOTS)
         printf("There isn't any root\n");
-    else { /* (nroots != INFROOTS && nroots != NOROOTS) => nroots is digit */
+    else { /* (n_roots != INF_ROOTS && n_roots != NO_ROOTS) => n_roots is digit */
         printf("There ");
-        if (nroots == ONEROOT)
+        if (n_roots == ONE_ROOT)
             printf("is 1 root. ");
-        else /* (nroots != ONEROOT) => many roots */
-            printf("are %d roots. ", (int)nroots);
+        else /* (n_roots != ONE_ROOT) => many roots */
+            printf("are %d roots. ", (int)n_roots);
 
         va_list root;
         double nroot;
-        va_start(root, nroots);
-        for(int i = 1; i <= (int)nroots; i++) {
+        va_start(root, n_roots);
+        for(int i = 1; i <= (int)n_roots; i++) {
             nroot = va_arg(root, double);
             printf("x%d: %.4lf; ", i, nroot);
         }

@@ -1,18 +1,28 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <assert.h>
 #include <math.h>
 #include <ctype.h>
 
-#define EPSILON 0.00001                     //comparison accuracy
-typedef enum {NOROOTS, ONEROOT, TWOROOTS, INFROOTS = -2} rootsc;
-typedef enum {FILE_INPUT, CONSOLE_INPUT, ERR} inptype;
-typedef enum {NO, YES, NONE} answ;
+#define MAX_FILENAME_LONG 100
+#define EPSILON 0.00001                                     //comparison accuracy
+typedef enum {NO_ROOTS, ONE_ROOT, TWO_ROOTS, INF_ROOTS = -2} Roots_c;
+typedef enum {FILE_INPUT, CONSOLE_INPUT, ERROR} Input_type;
+typedef enum {NO, YES, NONE} Answer;
+
+enum {MAIN_NORMAL, MAIN_FILE_ERROR,
+      MAIN_INPUT_ERROR, MAIN_NROOT_ERROR};                  // return of main()
+typedef enum {FREQ_NORMAL, FREQ_STOP_PROGRAM,
+              FREQ_INPUT_ERROR, FREQ_READ_ERROR} Freq_err;  // return of FileRequestCoefficients()
+typedef enum {REQ_NORMAL, REQ_STOP_PROGRAM,
+              REQ_INPUT_ERROR} Req_err;                     // return of RequestCoefficients()
+typedef enum {PRINT_NORMAL, PRINT_NROOT_ERROR} Print_err;   // return of PrintRoots()
 
 #define ON  1
 #define OFF 0
 
-#define COLORSWITCH ON                  // switch color output
+#define COLORSWITCH ON                                      // switch color output
 
 #if COLORSWITCH == ON
     #define RED "\x1b[31m"
@@ -29,30 +39,34 @@ typedef enum {NO, YES, NONE} answ;
 #endif
 
 /* AskInputType: asks the user to choose input type.
-Returns FILE_INPUT or CONSOLE_INPUT or ERR if there is error. */
-inptype AskInputType(void);
+Returns FILE_INPUT or CONSOLE_INPUT or ERROR if there is error. */
+Input_type AskInputType(void);
 
 /* FileRequestCoefficients: transmit three values from coefficients.txt to addresses pcoef_a, pcoef_b, pcoef_c.
 Returns 0 if everything is correct or 1 if there is file read error or 2 if there is fscanf error. */
-int FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b, double* const p_coef_c);
+Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b, double* const p_coef_c);
+
+/* Asks the user to write name of file until this is in correct form.
+Returns pointer to begining of string with filename. */
+char* GetFilename();
 
 /* RequestCoefficients: transmit three values from input to addresses pcoef_a, pcoef_b, pcoef_c.
 Returns 1 if the user wants to close the program or 0 otherwise or 2 if there is error. */
-int RequestCoefficients(double* const p_coef_a, double* const p_coef_b, double* const p_coef_c);
+Req_err RequestCoefficients(double* const p_coef_a, double* const p_coef_b, double* const p_coef_c);
 
 /* SolveQuadratic: finds the solution of quadratic equation with coefficients coef_a, coef_b, coef_c
 and writes them to the address proot1, proot2.
 If equation has only one solution, it will be written to addres proot1.
-Returns the number of solutions or INFROOTS if there are infinite. */
-rootsc SolveQuadratic(const double coef_a, const double coef_b, const double coef_c, double* const p_root1, double* const p_root2);
+Returns the number of solutions or INF_ROOTS if there are infinite. */
+Roots_c SolveQuadratic(const double coef_a, const double coef_b, const double coef_c, double* const p_root1, double* const p_root2);
 
-/* PrintRoots: print roots depending on the value of nroots.
+/* PrintRoots: print roots depending on the value of n_roots.
 Returns 1 if everything is correct or 0 otherwise. */
-int PrintRoots(rootsc nroots, const double root1, const double root2);
+Print_err PrintRoots(Roots_c n_roots, const double root_1, const double root_2);
 
 /* AskYesOrNo: asks the user to write Y or N unless he do it.
 Returns 1 if answer is Y or 0 if answer is N. */
-answ AskYesOrNo(void);
+Answer AskYesOrNo(void);
 
 /* ClearInputBuf: clears the input buffer from excess symbols.
 Buffer mustn't be empty. */
@@ -64,8 +78,8 @@ bool CmpEpsPrec(const double a, const double b);
 
 /* SolveLinear: finds the solution of linear equation with coefficients coef_a, coef_b
 and writes them to the address proot.
-Returns the number of solutions or INFROOTS if there are infinite. */
-rootsc SolveLinear(const double coef_a, const double coef_b, double* const p_root);
+Returns the number of solutions or INF_ROOTS if there are infinite. */
+Roots_c SolveLinear(const double coef_a, const double coef_b, double* const p_root);
 
 /* DivideSmart: returns the quotient of dividend/divider preventing the return of -0.0 */
 double DivideSmart(const double dividend, const double divider);
