@@ -49,31 +49,55 @@ Input_type AskInputType() {
 }
 
 
-Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b, double* const p_coef_c) { //TODO reask name of file if FREQ_READ_ERROR or FREQ_INPUT_ERROR is done
-    printf("Enter a filename like: " Color("coefficients.txt", YEL) "\n");                                 //TODO reask if user say Y to question: would ypu like to try again?
+Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b, double* const p_coef_c) { //TODO delete one of similar fragment of code
+    assert(p_coef_a != NULL);
+    assert(p_coef_b != NULL);
+    assert(p_coef_c != NULL);
+    assert(p_coef_a != p_coef_b && p_coef_a != p_coef_c && p_coef_b != p_coef_c);
 
-    char* filename = GetFilename();
+    Freq_err error_identification = FREQ_NORMAL;
 
-    if (filename == NULL)
-        return FREQ_STOP_PROGRAM;
+    while(1) {                                          // request the correct file unless input is possible to read 3 coefficients or program is closed
+        printf("Enter a filename like: " Color("coefficients.txt", YEL) "\n");
 
-    FILE* coefficients_file = fopen(filename, "r");
+        char* filename = GetFilename();
 
-    if (coefficients_file == NULL) {
-        printf("File " Color("%s", YEL) " doesn't exist or you don't have \"r\" permission\n", filename);
+        FILE* coefficients_file = fopen(filename, "r");
+
+        error_identification = FREQ_NORMAL;
+
+        if (coefficients_file == NULL)
+            error_identification = FREQ_READ_ERROR;
+        else if (fscanf(coefficients_file, "%lf %lf %lf", p_coef_a, p_coef_b, p_coef_c) != 3)
+            error_identification = FREQ_INPUT_ERROR;
+
+        if (error_identification != FREQ_NORMAL) {      // any error
+            if (error_identification == FREQ_READ_ERROR)
+                printf("File " Color("%s", YEL) " doesn't exist or you don't have \"r\" permission\n", filename);
+            if (error_identification == FREQ_INPUT_ERROR)
+                printf(Color("FileRequestCoefficients", YEL) ": " Color("%s", YEL)
+                       ": There must be three coefficients like: " Color("1 2 1", MAG) "\n", filename);
+            printf("Do you want to try again? (write " Color("Y", MAG) " if you do or "
+                   Color("N", MAG) " otherwise)\n");
+
+            fclose(coefficients_file);
+            free(filename);
+
+            Answer ask_result = AskYesOrNo();
+            if (ask_result == YES)
+                continue;
+            else if (ask_result == NO)
+                return FREQ_STOP_PROGRAM;
+            else
+                return FREQ_INPUT_ERROR;
+        }
+        else /* (error_identification == FREQ_NORMAL) => everything is correct */
+            break;
+
+        fclose(coefficients_file);
         free(filename);
-        return FREQ_READ_ERROR;
     }
 
-    if (fscanf(coefficients_file, "%lf %lf %lf", p_coef_a, p_coef_b, p_coef_c) != 3) {
-        printf(Color("FileRequestCoefficients", YEL) ": " Color("%s", YEL)
-               ": There must be three coefficients like: " Color("1 2 1", MAG) "\n", filename);
-        free(filename);
-        return FREQ_INPUT_ERROR;
-    }
-
-    fclose(coefficients_file);
-    free(filename);
     return FREQ_NORMAL;
 }
 
