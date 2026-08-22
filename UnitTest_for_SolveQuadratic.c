@@ -1,5 +1,3 @@
-/* RunFileTests: open file and do tests from it.
-Return percent of successful tests or negative code of error if it have occurred. */
 int RunFileTests() {
     FILE* tests_file = fopen("tests_for_SolveQuadratic.txt", "r");
 

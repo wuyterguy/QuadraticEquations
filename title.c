@@ -58,7 +58,7 @@ typedef enum {PRINT_NORMAL, PRINT_NROOT_ERROR}                         Print_err
 
 /* RunFileTests: open file and do tests from it.
 Return percent of successful tests or negative code of error if it have occurred. */
-int RunFileTests()
+int RunFileTests(void);
 
 /* PrintErrorMessage: print a message depending on error_type.
 Return error_type. */
