@@ -1,26 +1,3 @@
-#define MAX_TEST_LINE_LONG 200
-
-typedef enum {FTEST_EXP_NROOT_ERROR = -1, FTEST_INPUT_ERROR = -2,
-              FTEST_FOPEN_ERROR = -3, FTEST_READ_ERROR = -4} Ftest_err;  // return of RunFileTests()
-
-/* PrintErrorMessage: print a message depending on error_type.
-Return error_type. */
-int PrintErrorMessage(const Ftest_err error_type, const int test_number);
-
-/* RunTest: do test SolveQuadratic() with values from parameters.
-Return 1 if test is successful or 0 otherwise. */
-int RunTest(const double coef_a, const double coef_b, const double coef_c, const int exp_n_roots,
-            const double exp_root_1, const double exp_root_2, const int test_number);
-
-/* Swap: swap a from p_a and b from_p_b. */
-void Swap(double* const p_a, double* const p_b);
-
-/* PrintFailed: print field report. */
-void PrintFailed(const double coef_a, const double coef_b, const double coef_c,
-                 const int n_roots, const double root_1, const double root_2,
-                 const int exp_n_roots, const double exp_root_1, const double exp_root_2,
-                 const bool n_roots_conf, const bool root_1_conf, const bool root_2_conf, const int test_number);
-
 /* RunFileTests: open file and do tests from it.
 Return percent of successful tests or negative code of error if it have occurred. */
 int RunFileTests() {
@@ -78,7 +55,7 @@ int RunFileTests() {
     }
 
     fclose(tests_file);
-    return successful_tests * 100 / tests_count;
+    return successful_tests * PERCENT / tests_count;
 }
 
 
