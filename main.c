@@ -1,7 +1,7 @@
 #include "title.c"
 
 int main() {
-    double coef_a = 0.0, coef_b = 0.0, coef_c = 0.0;
+    double coef_a = NAN, coef_b = NAN, coef_c = NAN;
 
     Input_type askt_result = AskInputType();
     if (askt_result == FILE_INPUT) {
@@ -21,7 +21,7 @@ int main() {
     else
         return MAIN_INPUT_ERROR;
 
-    double root_1 = 0.0, root_2 = 0.0;
+    double root_1 = NAN, root_2 = NAN;
     Roots_c n_roots = SolveQuadratic(coef_a, coef_b, coef_c, &root_1, &root_2);
 
     if (PrintRoots(n_roots, root_1, root_2) != PRINT_NORMAL) {
@@ -49,7 +49,7 @@ Input_type AskInputType() {
 }
 
 
-Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b, double* const p_coef_c) { //TODO delete one of similar fragment of code
+Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b, double* const p_coef_c) {
     assert(p_coef_a != NULL);
     assert(p_coef_b != NULL);
     assert(p_coef_c != NULL);
@@ -67,12 +67,20 @@ Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b,
         error_identification = FREQ_NORMAL;
 
         if (coefficients_file == NULL)
-            error_identification = FREQ_READ_ERROR;
-        else if (fscanf(coefficients_file, "%lf %lf %lf", p_coef_a, p_coef_b, p_coef_c) != 3)
-            error_identification = FREQ_INPUT_ERROR;
+            error_identification = FREQ_FOPEN_ERROR;
+        else { /* (coefficients_file != NULL) */
+            if (fscanf(coefficients_file, "%lf %lf %lf", p_coef_a, p_coef_b, p_coef_c) != 3)
+                error_identification = FREQ_INPUT_ERROR;
+            if (ferror(coefficients_file)) {
+                printf("File " Color("%s", YEL) " - error during the reading\n", filename);
+                fclose(coefficients_file);
+                free(filename);
+                return FREQ_READ_ERROR;
+            }
+        }
 
         if (error_identification != FREQ_NORMAL) {      // any error
-            if (error_identification == FREQ_READ_ERROR)
+            if (error_identification == FREQ_FOPEN_ERROR)
                 printf("File " Color("%s", YEL) " doesn't exist or you don't have \"r\" permission\n", filename);
             if (error_identification == FREQ_INPUT_ERROR)
                 printf(Color("FileRequestCoefficients", YEL) ": " Color("%s", YEL)
@@ -265,7 +273,7 @@ double DivideSmart(const double dividend, const double divider) {
 
 
 bool CmpEpsPrec(const double a, const double b) {
-    if ((a <= b + EPSILON) && (a >= b - EPSILON))
+    if (((a <= b + EPSILON) && (a >= b - EPSILON)) || (isnan(a) && isnan(b)))
         return true;
     else
         return false;
