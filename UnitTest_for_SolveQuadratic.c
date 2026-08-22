@@ -1,8 +1,4 @@
-#include "title.c"
-
 #define MAX_TEST_LINE_LONG 200
-#define RANDOM_TESTS_NUMBER 100
-#define TEST_INPUT_ERROR = -1
 
 typedef enum {FTEST_EXP_NROOT_ERROR = -1, FTEST_INPUT_ERROR = -2,
               FTEST_FOPEN_ERROR = -3, FTEST_READ_ERROR = -4} Ftest_err;  // return of RunFileTests()
@@ -136,68 +132,6 @@ int RunTest(const double coef_a, const double coef_b, const double coef_c, const
 }
 
 
-Roots_c SolveQuadratic(const double coef_a, const double coef_b, const double coef_c,
-                       double* const p_root1, double* const p_root2) {
-    assert(p_root1 != NULL);
-    assert(p_root2 != NULL);
-    assert(p_root1 != p_root2);
-
-    if (CmpEpsPrec(coef_a, 0.0)) {
-        return SolveLinear(coef_b, coef_c, p_root1);
-    }
-    else { /* (coef_a != 0.0) => it's quadric education */
-        double discr = coef_b*coef_b - 4*coef_a*coef_c;
-        if (CmpEpsPrec(discr, 0.0)) {
-            *p_root1 = DivideSmart(-coef_b, 2*coef_a);
-            return ONE_ROOT;
-        }
-        else if (discr > 0.0) {
-            double sq_discr = sqrt(discr);
-            *p_root1 = DivideSmart(-coef_b + sq_discr, 2*coef_a);
-            *p_root2 = DivideSmart(-coef_b - sq_discr, 2*coef_a);
-            return TWO_ROOTS;
-        }
-        else { /* (discr < 0.0) => there is no solutions */
-            return NO_ROOTS;
-        }
-    }
-}
-
-
-Roots_c SolveLinear(const double coef_a, const double coef_b, double* const p_root) {
-    assert(p_root != NULL);
-
-    if (CmpEpsPrec(coef_a, 0.0)) {
-        if (CmpEpsPrec(coef_b, 0.0))
-            return INF_ROOTS;
-        else /* (coef_c != 0.0) */
-            return NO_ROOTS;
-    }
-    else { /* (coef_b != 0.0) */
-        *p_root = DivideSmart(-coef_b, coef_a);
-        return ONE_ROOT;
-    }
-}
-
-
-double DivideSmart(const double dividend, const double divider) {
-    assert(divider != 0.0);
-
-    if (!CmpEpsPrec(dividend, 0.0))
-        return dividend / divider;
-    else
-        return 0.0;
-}
-
-
-bool CmpEpsPrec(const double a, const double b) {
-    if (((a <= b + EPSILON) && (a >= b - EPSILON)) || (isnan(a) && isnan(b)))
-        return true;
-    else
-        return false;
-}
-
-
 void Swap(double* const p_a, double* const p_b) {
     assert(p_a != NULL);
     assert(p_b != NULL);
@@ -257,13 +191,4 @@ void PrintFailed(const double coef_a, const double coef_b, const double coef_c,
         printf("%-11.5lf", root_2);
     printf(END);                          // reset color
     printf("\n");
-}
-
-
-int main() {
-    int ftest_res = RunFileTests();
-    if (ftest_res > 0)
-        printf(Color("%d%%", MAG) " successful file tests\n", ftest_res);
-    else /* (ftest_res > 0) => there was error */
-        printf("Testing error\n");
 }

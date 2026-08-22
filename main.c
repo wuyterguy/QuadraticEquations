@@ -1,6 +1,18 @@
 #include "title.c"
+#include "UnitTest_for_SolveQuadratic.c"
 
 int main() {
+    int ftest_res = RunFileTests();
+    if (ftest_res >= 0)
+        printf(Color("%d%%", MAG) " successful file tests\n", ftest_res);
+    else /* (ftest_res > 0) => there was error */
+        return MAIN_TESTING_ERROR;
+
+    if (ftest_res < 100) {
+        printf("SolveQuadratic: test failed\n");
+        return MAIN_NORMAL;
+    }
+
     double coef_a = NAN, coef_b = NAN, coef_c = NAN;
 
     Input_type askt_result = AskInputType();
@@ -61,7 +73,6 @@ Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b,
         printf("Enter a filename like: " Color("coefficients.txt", YEL) "\n");
 
         char* filename = GetFilename();
-
         FILE* coefficients_file = fopen(filename, "r");
 
         error_identification = FREQ_NORMAL;
@@ -111,8 +122,8 @@ Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b,
 
 
 char* GetFilename() {
-    char c;
-    char* filename = (char*)calloc(MAX_FILENAME_LONG, sizeof(char));
+    char c; //TODO symb
+    char* filename = (char*) calloc(MAX_FILENAME_LONG, sizeof(char));
     char* name_end = filename;
     bool clear = true;
 

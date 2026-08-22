@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <assert.h>
 #include <math.h>
 #include <ctype.h>
 
@@ -11,10 +10,10 @@ typedef enum {NO_ROOTS = 0, ONE_ROOT = 1, TWO_ROOTS = 2, INF_ROOTS = -2} Roots_c
 typedef enum {FILE_INPUT, CONSOLE_INPUT, ERROR} Input_type;
 typedef enum {NO, YES, NONE} Answer;
 
-enum {MAIN_NORMAL, MAIN_FILE_ERROR,
-      MAIN_INPUT_ERROR, MAIN_NROOT_ERROR};                                    // return of main()
-typedef enum {FREQ_NORMAL, FREQ_STOP_PROGRAM,
-              FREQ_INPUT_ERROR, FREQ_FOPEN_ERROR, FREQ_READ_ERROR} Freq_err;  // return of FileRequestCoefficients()
+enum {MAIN_NORMAL, MAIN_FILE_ERROR, MAIN_INPUT_ERROR,
+      MAIN_NROOT_ERROR, MAIN_TESTING_ERROR};                                  // return of main()
+typedef enum {FREQ_NORMAL, FREQ_STOP_PROGRAM, FREQ_INPUT_ERROR,
+              FREQ_FOPEN_ERROR, FREQ_READ_ERROR} Freq_err;                    // return of FileRequestCoefficients()
 typedef enum {REQ_NORMAL, REQ_STOP_PROGRAM,
               REQ_INPUT_ERROR} Req_err;                                       // return of RequestCoefficients()
 typedef enum {PRINT_NORMAL, PRINT_NROOT_ERROR} Print_err;                     // return of PrintRoots()
@@ -37,6 +36,21 @@ typedef enum {PRINT_NORMAL, PRINT_NROOT_ERROR} Print_err;                     //
 #else
     #define Color(s, color) s
 #endif
+
+#undef assert
+
+//#define NDEBUG                                                                // switch assert off
+
+#ifndef NDEBUG
+    #define assert(condition)                                                                          \
+    if(!(condition)) {                                                                                 \
+        fprintf(stderr, "Assertion failed: " #condition ", file %s, line %d", __FILE__, __LINE__);     \
+        abort();                                                                                       \
+    }
+#else
+    #define assert(condition)
+#endif
+
 
 /* AskInputType: ask the user to choose input type.
 Return FILE_INPUT or CONSOLE_INPUT or ERROR if there is error. */
