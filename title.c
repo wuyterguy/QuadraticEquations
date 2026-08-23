@@ -76,7 +76,7 @@ typedef enum {PRINT_NORMAL, PRINT_NROOT_ERROR}                         Print_err
 struct {
     int FILE_INPUT_FLAG : 1;
     int CONSOLE_INPUT_FLAG : 1;
-    int preliminary_testing_flag : 1;
+    int PRELIMINARY_TESTING_FLAG : 1;
 } COMMAND_LINE_FLAGS = {};
 //char COMMAND_LINE_FLAGS_LIST[] = "fct";
 
@@ -84,76 +84,178 @@ struct Expected_sq_result {int n_roots; double root_1; double root_2;};
 struct Conformity_sq_result {bool n_roots, root_1, root_2;};
 
 
-/* ArgHandler: get command line flags from command line arguments */
-void ArgHandler(int argc, char* argv[]);
+/**
+ * @brief get command line flags from command line arguments
+ *
+ * @param argc argc from command line
+ * @param agrv argv from command line
+ */
+void HandleArg(const int argc, const char* argv[]);
 
 
-/* RunFileTests: open file and do tests from it.
-Return percent of successful tests or negative code of error if it have occurred. */
+/**
+ * @brief open file and do tests from it
+ *
+ * @return percent of successful tests or negative code of error if it have occurred
+ */
 int RunFileTests(void);
 
-/* PrintErrorMessage: print a message depending on error_type.
-Return error_type. */
+/**
+ * @brief print a message depending on error_type
+ *
+ * @param error_type  error number
+ * @param test_number number of failed test
+ *
+ * @return error_type converted to int
+ */
 int PrintErrorMessage(const Ftest_err error_type, const int test_number);
 
-/* RunTest: do test SolveQuadratic() with values from parameters.
-Return 1 if test is successful or 0 otherwise. */
+/**
+ * @brief do test of SolveQuadratic() using values from parameters
+ *
+ * @param coef_a      coefficient a of quadratic equal
+ * @param coef_b      coefficient b of quadratic equal
+ * @param coef_c      coefficient c of quadratic equal
+ * @param exp         structure containing expected values
+ * @param test_number number of current test
+ *
+ * @return 1 if test is successful or 0 otherwise
+ */
 int RunTest(const double coef_a, const double coef_b, const double coef_c,
             const Expected_sq_result exp, const int test_number);
 
-/* Swap: swap a from p_a and b from_p_b. */
+/**
+ * @brief swap a from p_a and b from_p_b
+ *
+ * @param p_a pointer to a
+ * @param p_b pointer to b
+ */
 void Swap(double* const p_a, double* const p_b);
 
-/* PrintFailed: print field report. */
+/**
+ * @brief print failed report
+ *
+ * @param coef_a  coefficient a of quadratic equal
+ * @param coef_b  coefficient b of quadratic equal
+ * @param coef_c  coefficient c of quadratic equal
+ * @param n_roots number of roots
+ * @param roor_1  first root of quadratic equal
+ * @param roor_2  second root of quadratic equal
+ * @param exp     structure containing expected values
+ * @param conf    structure containing information about conformity between got and expected values
+ */
 void PrintFailed(const double coef_a, const double coef_b, const double coef_c,
                  const int n_roots, const double root_1, const double root_2,
                  const Expected_sq_result exp, const Conformity_sq_result conf, const int test_number);
 
 
-/* AskInputType: ask the user to choose input type.
-Return FILE_INPUT or CONSOLE_INPUT or ERROR if there is error. */
+/**
+ * @brief ask the user to choose input type
+ *
+ * @return FILE_INPUT or CONSOLE_INPUT or ERROR if there is error
+ */
 Input_type AskInputType(void);
 
-/* FileRequestCoefficients: transmit three values from coefficients.txt to addresses pcoef_a, pcoef_b, pcoef_c.
-Return 0 if everything is correct or 1 if there is file read error or 2 if there is fscanf error. */
+/**
+ * @brief transmit three values from coefficients.txt to addresses pcoef_a, pcoef_b, pcoef_c
+ *
+ * @param p_coef_a pointer to coefficient a of quadratic equal
+ * @param p_coef_b pointer to coefficient b of quadratic equal
+ * @param p_coef_c pointer to coefficient c of quadratic equal
+ *
+ * @return FREQ_NORMAL or error number
+ */
 Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b, double* const p_coef_c);
 
-/* Ask the user to write name of file until this is in correct form.
-Return pointer to begining of string with filename. */
+/**
+ * @brief Ask the user to write name of file until this is in correct form.
+ *
+ * @return filename
+ */
 char* GetFilename(void);
 
-/* RequestCoefficients: transmit three values from input to addresses pcoef_a, pcoef_b, pcoef_c.
-Return 1 if the user wants to close the program or 0 otherwise or 2 if there is error. */
+/**
+ * @brief transmit three values from input to addresses pcoef_a, pcoef_b, pcoef_c
+ *
+ * @param p_coef_a pointer to coefficient a of quadratic equal
+ * @param p_coef_b pointer to coefficient b of quadratic equal
+ * @param p_coef_c pointer to coefficient c of quadratic equal
+ *
+ * @return REQ_NORMAL or error number
+ */
 Req_err RequestCoefficients(double* const p_coef_a, double* const p_coef_b, double* const p_coef_c);
 
-/* AskYesOrNo: ask the user to write Y or N unless he do it.
-Return 1 if answer is Y or 0 if answer is N. */
+/**
+ * @brief ask the user to write Y or N unless he do it
+ *
+ * @return YES if answer is Y or  if answer is N
+ */
 Answer AskYesOrNo(void);
 
-/* ClearInputBuf: clear the input buffer from excess symbols.
-Buffer mustn't be empty. */
+/**
+ * @brief clear the input buffer from excess symbols
+ *
+ * @note Buffer mustn't be empty
+ */
 void ClearInputBuf(void);
 
 
-/* SolveQuadratic: find the solution of quadratic equation with coefficients coef_a, coef_b, coef_c
-and write them to the address proot1, proot2.
-If equation has only one solution, it will be written to addres proot1.
-Return the number of solutions or INF_ROOTS if there are infinite. */
+/**
+ * @brief find the solution of quadratic equation with coefficients coef_a, coef_b, coef_c
+ *        and write them to the address proot1, proot2
+ * @param coef_a   coefficient a of quadratic equal
+ * @param coef_b   coefficient b of quadratic equal
+ * @param coef_c   coefficient c of quadratic equal
+ * @param n_roots  number of roots
+ * @param p_roor_1 pointer to first root of quadratic equal
+ * @param p_roor_2 pointer to second root of quadratic equal
+ *
+ * @return the number of solutions or INF_ROOTS if there are infinite
+ *
+ * @note If equation has only one solution, it will be written to addres proot1
+ */
 Roots_c SolveQuadratic(const double coef_a, const double coef_b, const double coef_c, double* const p_root1, double* const p_root2);
 
-/* SolveLinear: find the solution of linear equation with coefficients coef_a, coef_b
-and write them to the address proot.
-Return the number of solutions or INF_ROOTS if there are infinite. */
+/**
+ * @brief find the solution of linear equation with coefficients coef_a, coef_b
+ *        and write them to the address proot
+ * @param coef_a   coefficient a of linear equal
+ * @param coef_b   coefficient b of linear equal
+ * @param n_roots  number of roots
+ * @param p_root   pointer to root of linear equal
+ *
+ * @return the number of solutions or INF_ROOTS if there are infinite
+ */
 Roots_c SolveLinear(const double coef_a, const double coef_b, double* const p_root);
 
-/* DivideSmart: return the quotient of dividend/divider preventing the return of -0.0 */
+/**
+ * @brief divide dividend/divider preventing the return of -0.0
+ *
+ * @param dividend dividend
+ * @param divider  divider
+ *
+ * @return the quotient of dividend/divider
+ */
 double DivideSmart(const double dividend, const double divider);
 
-/* CmpEpsPrec: compares roots a and b taking EPSILON as accuracy into account.
-Return 1 if (a = b) || (a = NAN && b = NAN) or 0 otherwise. */
+/**
+ * @brief compares roots a and b taking EPSILON as accuracy into account
+ *
+ * @param a first being compared number
+ * @param b second being compared number
+ *
+ * @return 1 if (a = b) || (a = NAN && b = NAN) or 0 otherwise
+ */
 bool CmpEpsPrec(const double a, const double b);
 
 
-/* PrintRoots: print roots depending on the value of n_roots.
-Return 1 if everything is correct or 0 otherwise. */
+/**
+ * @brief print roots depending on the value of n_roots
+ *
+ * @param n_roots  number of roots
+ * @param p_roor_1 first root of quadratic equal
+ * @param p_roor_2 second root of quadratic equal
+ *
+ * @return PRINT_NORMAL or error number
+ */
 Print_err PrintRoots(Roots_c n_roots, const double root_1, const double root_2);

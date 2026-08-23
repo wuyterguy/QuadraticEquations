@@ -3,15 +3,15 @@
 #include "input_functions.c"
 #include "calculation_functions.c"
 
-int main(int argc, char* argv[]) {
-    ArgHandler(argc, argv);
+int main(const int argc, const char* argv[]) {
+    HandleArg(argc, argv);
 
-    if (COMMAND_LINE_FLAGS.preliminary_testing_flag) {
+    if (COMMAND_LINE_FLAGS.PRELIMINARY_TESTING_FLAG) {
         int ftest_res = RunFileTests();
         if (ftest_res < 0)
             return MAIN_TESTING_ERROR;
 
-        if (ftest_res < 100) {
+        if (ftest_res < 100) { //TODO mac
             printf(Color("%d%%", MAG) " successful file tests\n", ftest_res);
             printf("SolveQuadratic: test failed\n");
             return MAIN_NORMAL;
@@ -52,9 +52,9 @@ int main(int argc, char* argv[]) {
 }
 
 
-void ArgHandler(int argc, char* argv[]) {
+void HandleArg(const int argc, const char* argv[]) {
     for (int arg_index = 1; arg_index < argc; arg_index++) {
-        char* arg_position = argv[arg_index];
+        const char* arg_position = argv[arg_index];
         if (*arg_position++ != '-')
             continue;
 
@@ -64,7 +64,7 @@ void ArgHandler(int argc, char* argv[]) {
             if (*arg_position == 'c')
                 COMMAND_LINE_FLAGS.CONSOLE_INPUT_FLAG = 1;
             if (*arg_position == 't')
-                COMMAND_LINE_FLAGS.preliminary_testing_flag = 1;
+                COMMAND_LINE_FLAGS.PRELIMINARY_TESTING_FLAG = 1;
 
             arg_position++;
         }
