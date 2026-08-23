@@ -12,7 +12,7 @@ int RunFileTests() {
     double exp_root_1 = NAN, exp_root_2 = NAN;
     int exp_n_roots = (int)NO_ROOTS;
 
-    char line[MAX_TEST_LINE_LONG];
+    char line[MAX_TEST_LINE_LONG] = {};
     int symbols_read = 0;
 
     while (fgets(line, sizeof(line), tests_file) != NULL) {

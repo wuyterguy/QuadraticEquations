@@ -53,7 +53,8 @@ double DivideSmart(const double dividend, const double divider) {
 
 
 bool CmpEpsPrec(const double a, const double b) {
-    if (((a <= b + EPSILON) && (a >= b - EPSILON)) || (isnan(a) && isnan(b)))
+    if (((a <= b + EPSILON) && (a >= b - EPSILON)) ||
+        (isnan(a) && isnan(b)))
         return true;
     else
         return false;

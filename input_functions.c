@@ -50,6 +50,7 @@ Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b,
             if (error_identification == FREQ_INPUT_ERROR)
                 printf(Color("FileRequestCoefficients", YEL) ": " Color("%s", YEL)
                        ": There must be three coefficients like: " Color("1 2 1", MAG) "\n", filename);
+
             printf("Do you want to try again? (write " Color("Y", MAG) " if you do or "
                    Color("N", MAG) " otherwise)\n");
 
@@ -76,30 +77,30 @@ Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b,
 
 
 char* GetFilename() {
-    char c; //TODO symb
+    char got_symb = 0;
     char* filename = (char*) calloc(MAX_FILENAME_LONG, sizeof(char));
     char* name_end = filename;
     bool clear = true;
 
-    while (1) {                                                    // request answer unless it is correct
+    while (1) {                                                                          // request answer unless it is correct
         name_end = filename;
         clear = true;
-        while (((c = getchar()) == ' ') || (c == '\t'));           // skip spaces
+        while (((got_symb = getchar()) == ' ') || (got_symb == '\t'));                   // skip spaces
 
-        if (!isalpha(c)) {                                         // first symbol is not letter
-            if ((c == '\n') || (c == EOF))
+        if (!isalpha(got_symb)) {                                                        // first symbol is not letter
+            if ((got_symb == '\n') || (got_symb == EOF))
                 clear = false;
-            goto CLEAR_BUF_AND_REPRINT; /* continue with clear and reprint */
+            goto CLEAR_BUF_AND_REPRINT;                                                  /* continue with clear and reprint */
         }
 
-        *name_end++ = c;                                           // read first symbol which is letter
-        while (isalnum(c = getchar()) || (c == '.') || (c == '_'))  // read symbols until there is space symbol or end of buffer
-            *name_end++ = c;
+        *name_end++ = got_symb;                                                          // read first symbol which is letter
+        while (isalnum(got_symb = getchar()) || (got_symb == '.') || (got_symb == '_'))  // read symbols until there is space symbol or end of buffer
+            *name_end++ = got_symb;
 
-        while ((c == ' ') || (c == '\t'))                          // skip spaces
-            c = getchar();
+        while ((got_symb == ' ') || (got_symb == '\t'))                                  // skip spaces
+            got_symb = getchar();
 
-        if ((c == '\n') || (c == EOF)) {                           // this is correct name => return it
+        if ((got_symb == '\n') || (got_symb == EOF)) {                                   // this is correct name => return it
             *name_end++ = '\0';
             return filename;
         }
@@ -148,24 +149,24 @@ Req_err RequestCoefficients(double* const p_coef_a, double* const p_coef_b, doub
 
 
 Answer AskYesOrNo() {
-    char c;
+    char got_symb = 0;
     Answer result = NONE;
     bool clear = true;
 
-    while (1) {                                                 // request answer unless it is correct
+    while (1) {                                                                // request answer unless it is correct
         result = NONE;
         clear = true;
-        while (((c = getchar()) == ' ') || (c == '\t'));         // skip spaces
+        while (((got_symb = getchar()) == ' ') || (got_symb == '\t'));         // skip spaces
 
-        if (c == 'Y')
+        if (got_symb == 'Y')
             result = YES;
-        else if (c  == 'N')
+        else if (got_symb == 'N')
             result = NO;
-        else if ((c == '\n') || (c == EOF))
-            clear = false;                                      // buffer is empty
+        else if ((got_symb == '\n') || (got_symb == EOF))
+            clear = false;                                                     // buffer is empty
         if (result != NONE) {
-            while (((c = getchar()) == ' ') || (c == '\t'));     // skip spaces
-            if ((c == '\n') || (c == EOF))
+            while (((got_symb = getchar()) == ' ') || (got_symb == '\t'));     // skip spaces
+            if ((got_symb == '\n') || (got_symb == EOF))
                 return result;
         }
 
@@ -178,6 +179,6 @@ Answer AskYesOrNo() {
 
 
 void ClearInputBuf(){
-    char c;
+    char c = 0;
     while(((c = getchar()) != EOF) && (c != '\n'));
 }
