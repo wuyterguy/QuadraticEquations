@@ -3,17 +3,22 @@
 #include "input_functions.c"
 #include "calculation_functions.c"
 
-int main() {
-    int ftest_res = RunFileTests();
-    if (ftest_res >= 0)
-        printf(Color("%d%%", MAG) " successful file tests\n", ftest_res);
-    else /* (ftest_res > 0) => there was error */
-        return MAIN_TESTING_ERROR;
+int main(int argc, char* argv[]) {
+    ArgHandler(argc, argv);
 
-    if (ftest_res < 100) {
-        printf("SolveQuadratic: test failed\n");
-        return MAIN_NORMAL;
+    if (COMMAND_LINE_FLAGS.preliminary_testing_flag) {
+        int ftest_res = RunFileTests();
+        if (ftest_res < 0)
+            return MAIN_TESTING_ERROR;
+
+        if (ftest_res < 100) {
+            printf(Color("%d%%", MAG) " successful file tests\n", ftest_res);
+            printf("SolveQuadratic: test failed\n");
+            return MAIN_NORMAL;
+        }
     }
+
+    printf("Quadratic equations solver by " Color("Zotov Anton", YEL) "\n");
 
     double coef_a = NAN, coef_b = NAN, coef_c = NAN;
 
@@ -44,6 +49,26 @@ int main() {
     }
 
     return MAIN_NORMAL;
+}
+
+
+void ArgHandler(int argc, char* argv[]) {
+    for (int arg_index = 1; arg_index < argc; arg_index++) {
+        char* arg_position = argv[arg_index];
+        if (*arg_position++ != '-')
+            continue;
+
+        while (isalpha(*arg_position)) {
+            if (*arg_position == 'f')
+                COMMAND_LINE_FLAGS.FILE_INPUT_FLAG = 1;
+            if (*arg_position == 'c')
+                COMMAND_LINE_FLAGS.CONSOLE_INPUT_FLAG = 1;
+            if (*arg_position == 't')
+                COMMAND_LINE_FLAGS.preliminary_testing_flag = 1;
+
+            arg_position++;
+        }
+    }
 }
 
 

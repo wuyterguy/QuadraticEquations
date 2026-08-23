@@ -1,20 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include <math.h>
 #include <ctype.h>
 
-#define MAX_FILENAME_LONG 100
-#define EPSILON 0.00001                                                           // comparison accuracy
 #define MAX_TEST_LINE_LONG 200
 #define PERCENT 100
+#define TESTFILE "tests_for_SolveQuadratic.txt"
+#define MAX_FILENAME_LONG 100
+#define EPSILON 0.00001                                                           // comparison accuracy
 
 enum {MAIN_NORMAL, MAIN_FILE_ERROR, MAIN_INPUT_ERROR,
       MAIN_NROOT_ERROR, MAIN_TESTING_ERROR};                                      // return of main()
-typedef enum {FTEST_EXP_NROOT_ERROR = -1, FTEST_INPUT_ERROR = -2,
+typedef enum {FTEST_NORMAL = 0, FTEST_EXP_NROOT_ERROR = -1, FTEST_INPUT_ERROR = -2,
               FTEST_FOPEN_ERROR = -3, FTEST_READ_ERROR = -4}           Ftest_err; // return of RunFileTests()
 typedef enum {FILE_INPUT, CONSOLE_INPUT, ERROR}                       Input_type; // return of AskInputType()
-typedef enum {NO, YES, NONE}                                              Answer; // return of AskYesOrNo())
+typedef enum {NO = 0, YES = 1, NONE = 2}                                  Answer; // return of AskYesOrNo())
 typedef enum {FREQ_NORMAL, FREQ_STOP_PROGRAM, FREQ_INPUT_ERROR,
               FREQ_FOPEN_ERROR, FREQ_READ_ERROR}                        Freq_err; // return of FileRequestCoefficients()
 typedef enum {REQ_NORMAL, REQ_STOP_PROGRAM,
@@ -22,12 +24,15 @@ typedef enum {REQ_NORMAL, REQ_STOP_PROGRAM,
 typedef enum {NO_ROOTS = 0, ONE_ROOT = 1, TWO_ROOTS = 2, INF_ROOTS = -2} Roots_c; // return od Solve___()
 typedef enum {PRINT_NORMAL, PRINT_NROOT_ERROR}                         Print_err; // return of PrintRoots()
 
+
 #define ON  1
 #define OFF 0
 
-#define COLORSWITCH ON                                                            // switch color output
+#define COLOR_SWITCH ON                                                            // switch color output
 
-#if COLORSWITCH == ON
+#define SCREEN_CLEAR_SWITCH ON                                                     // switch clearing screen
+
+#if COLOR_SWITCH == ON
     #define RED "\x1b[31m"
     #define BLU "\x1b[34m"
     #define GRE "\x1b[32m"
@@ -38,12 +43,25 @@ typedef enum {PRINT_NORMAL, PRINT_NROOT_ERROR}                         Print_err
     /* Color: is replaced by s colored in color */
     #define Color(s, color) color s END
 #else
+    #define RED ""
+    #define BLU ""
+    #define GRE ""
+    #define YEL ""
+    #define MAG ""
+    #define END ""
+
     #define Color(s, color) s
+#endif
+
+#if SCREEN_CLEAR_SWITCH == ON
+    #define clear_to_line(line) printf("\e[;1H\e[2J");
+#else
+    #define clear_to_line(line)
 #endif
 
 #undef assert
 
-//#define NDEBUG                                                                // switch assert off
+#define NDEBUG                                                                // switch assert off
 
 #ifndef NDEBUG
     #define assert(condition)                                                                          \
@@ -54,6 +72,20 @@ typedef enum {PRINT_NORMAL, PRINT_NROOT_ERROR}                         Print_err
 #else
     #define assert(condition)
 #endif
+
+struct {
+    int FILE_INPUT_FLAG : 1;
+    int CONSOLE_INPUT_FLAG : 1;
+    int preliminary_testing_flag : 1;
+} COMMAND_LINE_FLAGS = {};
+//char COMMAND_LINE_FLAGS_LIST[] = "fct";
+
+struct Expected_sq_result {int n_roots; double root_1; double root_2;};
+struct Conformity_sq_result {bool n_roots, root_1, root_2;};
+
+
+/* ArgHandler: get command line flags from command line arguments */
+void ArgHandler(int argc, char* argv[]);
 
 
 /* RunFileTests: open file and do tests from it.
@@ -66,8 +98,8 @@ int PrintErrorMessage(const Ftest_err error_type, const int test_number);
 
 /* RunTest: do test SolveQuadratic() with values from parameters.
 Return 1 if test is successful or 0 otherwise. */
-int RunTest(const double coef_a, const double coef_b, const double coef_c, const int exp_n_roots,
-            const double exp_root_1, const double exp_root_2, const int test_number);
+int RunTest(const double coef_a, const double coef_b, const double coef_c,
+            const Expected_sq_result exp, const int test_number);
 
 /* Swap: swap a from p_a and b from_p_b. */
 void Swap(double* const p_a, double* const p_b);
@@ -75,8 +107,7 @@ void Swap(double* const p_a, double* const p_b);
 /* PrintFailed: print field report. */
 void PrintFailed(const double coef_a, const double coef_b, const double coef_c,
                  const int n_roots, const double root_1, const double root_2,
-                 const int exp_n_roots, const double exp_root_1, const double exp_root_2,
-                 const bool n_roots_conf, const bool root_1_conf, const bool root_2_conf, const int test_number);
+                 const Expected_sq_result exp, const Conformity_sq_result conf, const int test_number);
 
 
 /* AskInputType: ask the user to choose input type.

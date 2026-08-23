@@ -1,5 +1,9 @@
 Input_type AskInputType() {
-    printf("Quadratic equations solver by " Color("Zotov Anton", YEL) "\n");
+    if (COMMAND_LINE_FLAGS.FILE_INPUT_FLAG & !COMMAND_LINE_FLAGS.CONSOLE_INPUT_FLAG)
+        return FILE_INPUT;
+    if (COMMAND_LINE_FLAGS.CONSOLE_INPUT_FLAG & !COMMAND_LINE_FLAGS.FILE_INPUT_FLAG)
+        return CONSOLE_INPUT;
+
     printf("Would you like to use file input from file? (write "
            Color("Y", MAG) " or " Color("N", MAG) ")\n");
     printf("If you write N it will be console input\n");
@@ -12,7 +16,7 @@ Input_type AskInputType() {
     else
         return ERROR;
 }
-
+//TODO clear output
 
 Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b, double* const p_coef_c) {
     assert(p_coef_a != NULL);
@@ -20,36 +24,38 @@ Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b,
     assert(p_coef_c != NULL);
     assert(p_coef_a != p_coef_b && p_coef_a != p_coef_c && p_coef_b != p_coef_c);
 
-    Freq_err error_identification = FREQ_NORMAL;
+    Freq_err error_type = FREQ_NORMAL;
 
     while(1) {                                          // request the correct file unless input is possible to read 3 coefficients or program is closed
-        printf("Enter a filename like: " Color("coefficients.txt", YEL) "\n");
+        printf("Enter a filename like: " Color("coefficients.txt", YEL)
+               " (press " Color("Enter", MAG) " to use default file)" "\n");
 
         char* filename = GetFilename();
         FILE* coefficients_file = fopen(filename, "r");
 
-        error_identification = FREQ_NORMAL;
+        error_type = FREQ_NORMAL;
 
         if (coefficients_file == NULL)
-            error_identification = FREQ_FOPEN_ERROR;
+            error_type = FREQ_FOPEN_ERROR;
         else { /* (coefficients_file != NULL) */
             if (fscanf(coefficients_file, "%lf %lf %lf", p_coef_a, p_coef_b, p_coef_c) != 3)
-                error_identification = FREQ_INPUT_ERROR;
+                error_type = FREQ_INPUT_ERROR;
 
             if (ferror(coefficients_file)) {
                 printf("File " Color("%s", YEL) " - error during the reading\n", filename);
+
                 fclose(coefficients_file);
                 free(filename);
                 return FREQ_READ_ERROR;
             }
         }
 
-        if (error_identification != FREQ_NORMAL) {      // any error
-            if (error_identification == FREQ_FOPEN_ERROR)
+        if (error_type != FREQ_NORMAL) {      // any error
+            if (error_type == FREQ_FOPEN_ERROR)
                 printf("File " Color("%s", YEL) " doesn't exist or you don't have \"r\" permission\n", filename);
-            if (error_identification == FREQ_INPUT_ERROR)
+            if (error_type == FREQ_INPUT_ERROR)
                 printf(Color("FileRequestCoefficients", YEL) ": " Color("%s", YEL)
-                       ": There must be three coefficients like: " Color("1 2 1", MAG) "\n", filename);
+                       ": There must be three coefficients like: " Color("1 5 6", MAG) "\n", filename);
 
             printf("Do you want to try again? (write " Color("Y", MAG) " if you do or "
                    Color("N", MAG) " otherwise)\n");
@@ -65,7 +71,7 @@ Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b,
             else
                 return FREQ_INPUT_ERROR;
         }
-        else /* (error_identification == FREQ_NORMAL) => everything is correct */
+        else /* (error_type == FREQ_NORMAL) => everything is correct */
             break;
 
         fclose(coefficients_file);
@@ -88,9 +94,12 @@ char* GetFilename() {
         while (((got_symb = getchar()) == ' ') || (got_symb == '\t'));                   // skip spaces
 
         if (!isalpha(got_symb)) {                                                        // first symbol is not letter
-            if ((got_symb == '\n') || (got_symb == EOF))
-                clear = false;
-            goto CLEAR_BUF_AND_REPRINT;                                                  /* continue with clear and reprint */
+            if (got_symb == '\n') {                                                      // return default value
+                strcpy(filename, "coefficients.txt");
+                return filename;
+            }
+            if (got_symb == EOF)
+                goto CLEAR_BUF_AND_REPRINT; /* continue with clear and reprint */
         }
 
         *name_end++ = got_symb;                                                          // read first symbol which is letter
@@ -114,17 +123,29 @@ char* GetFilename() {
 }
 
 
-Req_err RequestCoefficients(double* const p_coef_a, double* const p_coef_b, double* const p_coef_c) {    //TODO any parameters count
+Req_err RequestCoefficients(double* const p_coef_a, double* const p_coef_b, double* const p_coef_c) {
     assert(p_coef_a != NULL);
     assert(p_coef_b != NULL);
     assert(p_coef_c != NULL);
     assert(p_coef_a != p_coef_b && p_coef_a != p_coef_c && p_coef_b != p_coef_c);
 
+    char first_symb = 0;
+
     while (1) {                          // request the introduction of coefficients unless input is correct or program is closed
-        printf("Enter the coefficients coef_a, coef_b, coef_c like: " Color("1 2 1", MAG) "\n");
+        printf("Enter the coefficients coef_a, coef_b, coef_c like: " Color("1 5 6", MAG)
+               " (press " Color("Enter", MAG) " to use coefficients from example)" "\n");
+
+        if((first_symb = getchar()) == '\n'){
+            *p_coef_a = 1;
+            *p_coef_b = 5;
+            *p_coef_c = 6;
+            return REQ_NORMAL;
+        }
+        else
+            ungetc(first_symb, stdin);
 
         if (scanf("%lf %lf %lf", p_coef_a, p_coef_b, p_coef_c) != 3) {
-            ClearInputBuf();        // clear the input buffer from excess symbols
+            ClearInputBuf();             // clear the input buffer from excess symbols
 
             printf(Color("RequestCoefficients:", YEL) "There must be three coefficients like: "
                    Color("1 2 1", MAG) "\n");
