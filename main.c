@@ -60,11 +60,11 @@ void HandleArg(const int argc, const char* argv[]) {
 
         while (isalpha(*arg_position)) {
             if (*arg_position == 'f')
-                COMMAND_LINE_FLAGS.FILE_INPUT_FLAG = 1;
+                COMMAND_LINE_FLAGS.FILE_INPUT_FLAG = 1u;
             if (*arg_position == 'c')
-                COMMAND_LINE_FLAGS.CONSOLE_INPUT_FLAG = 1;
+                COMMAND_LINE_FLAGS.CONSOLE_INPUT_FLAG = 1u;
             if (*arg_position == 't')
-                COMMAND_LINE_FLAGS.PRELIMINARY_TESTING_FLAG = 1;
+                COMMAND_LINE_FLAGS.PRELIMINARY_TESTING_FLAG = 1u;
 
             arg_position++;
         }

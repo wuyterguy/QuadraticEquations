@@ -83,7 +83,7 @@ Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b,
 
 
 char* GetFilename() {
-    char got_symb = 0;
+    int got_symb = 0;
     char* filename = (char*) calloc(MAX_FILENAME_LONG, sizeof(char));
     char* name_end = filename;
     bool clear = true;
@@ -102,9 +102,9 @@ char* GetFilename() {
                 goto CLEAR_BUF_AND_REPRINT; /* continue with clear and reprint */
         }
 
-        *name_end++ = got_symb;                                                          // read first symbol which is letter
+        *name_end++ = (char)got_symb;                                                          // read first symbol which is letter
         while (isalnum(got_symb = getchar()) || (got_symb == '.') || (got_symb == '_'))  // read symbols until there is space symbol or end of buffer
-            *name_end++ = got_symb;
+            *name_end++ = (char)got_symb;
 
         while ((got_symb == ' ') || (got_symb == '\t'))                                  // skip spaces
             got_symb = getchar();
@@ -129,7 +129,7 @@ Req_err RequestCoefficients(double* const p_coef_a, double* const p_coef_b, doub
     assert(p_coef_c != NULL);
     assert(p_coef_a != p_coef_b && p_coef_a != p_coef_c && p_coef_b != p_coef_c);
 
-    char first_symb = 0;
+    int first_symb = 0;
 
     while (1) {                          // request the introduction of coefficients unless input is correct or program is closed
         printf("Enter the coefficients coef_a, coef_b, coef_c like: " Color("1 5 6", MAG)
@@ -170,7 +170,7 @@ Req_err RequestCoefficients(double* const p_coef_a, double* const p_coef_b, doub
 
 
 Answer AskYesOrNo() {
-    char got_symb = 0;
+    int got_symb = 0;
     Answer result = NONE;
     bool clear = true;
 
@@ -200,6 +200,6 @@ Answer AskYesOrNo() {
 
 
 void ClearInputBuf(){
-    char c = 0;
+    int c = 0;
     while(((c = getchar()) != EOF) && (c != '\n'));
 }

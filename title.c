@@ -74,9 +74,9 @@ typedef enum {PRINT_NORMAL, PRINT_NROOT_ERROR}                         Print_err
 #endif
 
 struct {
-    int FILE_INPUT_FLAG : 1;
-    int CONSOLE_INPUT_FLAG : 1;
-    int PRELIMINARY_TESTING_FLAG : 1;
+    unsigned int FILE_INPUT_FLAG : 1;
+    unsigned int CONSOLE_INPUT_FLAG : 1;
+    unsigned int PRELIMINARY_TESTING_FLAG : 1;
 } COMMAND_LINE_FLAGS = {};
 //char COMMAND_LINE_FLAGS_LIST[] = "fct";
 
