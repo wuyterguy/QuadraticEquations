@@ -1,5 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdio.h>   // TODO txlib sfml raylib
+#include <stdlib.h>  // TODO clear output
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
@@ -90,6 +90,8 @@ struct Quadratic_coefficients {double a; double b; double c;};
  *
  * @param[in] argc argc from command line
  * @param[in] agrv argv from command line
+ *
+ * @return stract with got flags
  */
 Flags HandleArg(const int argc, const char* argv[]);
 
@@ -97,7 +99,7 @@ Flags HandleArg(const int argc, const char* argv[]);
 /**
  * @brief open file and do tests from it
  *
- * @return percent of successful tests or negative code of error if it have occurred
+ * @return percent of successful tests or exit negative error number if it have occurred
  */
 int RunFileTests(void);
 
@@ -112,9 +114,7 @@ void PrintErrorMessage(const Ftest_err error_type, const int test_number);
 /**
  * @brief do test of SolveQuadratic() using values from parameters
  *
- * @param[in] coef_a      coefficient a of quadratic equation
- * @param[in] coef_b      coefficient b of quadratic equation
- * @param[in] coef_c      coefficient c of quadratic equation
+ * @param[in] coef        structure containing coefficients of quadratic equation
  * @param[in] exp         structure containing expected values
  * @param[in] test_number number of current test
  *
@@ -133,9 +133,7 @@ void Swap(double* const p_a, double* const p_b);
 /**
  * @brief print failed report
  *
- * @param[in] coef_a  coefficient a of quadratic equation
- * @param[in] coef_b  coefficient b of quadratic equation
- * @param[in] coef_c  coefficient c of quadratic equation
+ * @param[in] coef    structure containing coefficients of quadratic equation
  * @param[in] n_roots number of roots
  * @param[in] roor_1  first root of quadratic equation
  * @param[in] roor_2  second root of quadratic equation
@@ -146,7 +144,14 @@ void PrintFailed(const Quadratic_coefficients coef, const int n_roots, const dou
                  const Expected_sq_result exp, const Conformity_sq_result conf, const int test_number);
 
 
-get_err GetCoefficients(Quadratic_coefficients* p_coef,Flags command_line_flags); //TODO doc there end fix everywhere with struct coef
+/**
+ * @brief get coefficients to addres coef by console or console depending on command_line_flags
+ *
+ * @param[in] coef pointer to structure containing coefficients of quadratic equation
+ *
+ * @return GET_NORMAL or exit with error number
+ */
+get_err GetCoefficients(Quadratic_coefficients* coef,Flags command_line_flags);
 
 /**
  * @brief ask the user to choose input type
@@ -156,15 +161,13 @@ get_err GetCoefficients(Quadratic_coefficients* p_coef,Flags command_line_flags)
 Input_type AskInputType(void);
 
 /**
- * @brief transmit three values from coefficients.txt to addresses pcoef_a, pcoef_b, pcoef_c
+ * @brief transmit three values from coefficients.txt to addresses coef
  *
- * @param[out] p_coef_a pointer to coefficient a of quadratic equation
- * @param[out] p_coef_b pointer to coefficient b of quadratic equation
- * @param[out] p_coef_c pointer to coefficient c of quadratic equation
+ * @param[in] coef pointer to structure containing coefficients of quadratic equation
  *
  * @return FREQ_NORMAL or exit with error number
  */
-Freq_err FileRequestCoefficients(Quadratic_coefficients* p_coef);
+Freq_err FileRequestCoefficients(Quadratic_coefficients* coef);
 
 /**
  * @brief Ask the user to write name of file until this is in correct form.
@@ -174,15 +177,13 @@ Freq_err FileRequestCoefficients(Quadratic_coefficients* p_coef);
 char* GetFilename(void);
 
 /**
- * @brief transmit three values from input to addresses pcoef_a, pcoef_b, pcoef_c
+ * @brief transmit three values from input to addresses coef
  *
- * @param[out] p_coef_a pointer to coefficient a of quadratic equation
- * @param[out] p_coef_b pointer to coefficient b of quadratic equation
- * @param[out] p_coef_c pointer to coefficient c of quadratic equation
+ * @param[in] coef pointer to structure containing coefficients of quadratic equation
  *
  * @return REQ_NORMAL or exit with error number
  */
-Req_err RequestCoefficients(Quadratic_coefficients* p_coef);
+Req_err RequestCoefficients(Quadratic_coefficients* coef);
 
 /**
  * @brief ask the user to write Y or N unless he do it
@@ -202,9 +203,7 @@ void ClearInputBuf(void);
 /**
  * @brief find the solution of quadratic equation with coefficients coef_a, coef_b, coef_c
  *        and write them to the address proot1, proot2
- * @param[in] coef_a   coefficient a of quadratic equation
- * @param[in] coef_b   coefficient b of quadratic equation
- * @param[in] coef_c   coefficient c of quadratic equation
+ * @param[in] coef      structure containing coefficients of quadratic equation
  * @param[out] p_roor_1 pointer to first root of quadratic equation
  * @param[out] p_roor_2 pointer to second root of quadratic equation
  *

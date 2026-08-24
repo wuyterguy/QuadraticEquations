@@ -36,7 +36,7 @@ Input_type AskInputType() {
         return TYPE_ERROR;
     }
 }
-//TODO clear output
+
 
 Freq_err FileRequestCoefficients(Quadratic_coefficients* coef) {
     assert(&coef->a != NULL);
@@ -142,7 +142,7 @@ char* GetFilename() {
             ClearInputBuf();
         printf("Enter a filename like: " Color("coefficients.txt", YEL) "\n");
     }
-} //TODO txlib sfml raylib
+}
 
 
 Req_err RequestCoefficients(Quadratic_coefficients* coef) {
