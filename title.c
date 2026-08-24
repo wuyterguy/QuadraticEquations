@@ -16,12 +16,13 @@ typedef enum {FTEST_NORMAL = 0, FTEST_EXP_NROOT_ERROR = -1, FTEST_INPUT_ERROR = 
               FTEST_FOPEN_ERROR = -3, FTEST_READ_ERROR = -4}           Ftest_err; // return of RunFileTests()
 typedef enum {FILE_INPUT, CONSOLE_INPUT, TYPE_ERROR}                  Input_type; // return of AskInputType()
 typedef enum {NO = 0, YES = 1, NONE = 2}                                  Answer; // return of AskYesOrNo())
-typedef enum {FREQ_NORMAL, FREQ_STOP_PROGRAM, FREQ_INPUT_ERROR,
+typedef enum {FREQ_NORMAL = 10, FREQ_STOP_PROGRAM, FREQ_INPUT_ERROR,
               FREQ_FOPEN_ERROR, FREQ_READ_ERROR}                        Freq_err; // return of FileRequestCoefficients()
-typedef enum {REQ_NORMAL, REQ_STOP_PROGRAM,
+typedef enum {REQ_NORMAL = 20, REQ_STOP_PROGRAM,
               REQ_INPUT_ERROR}                                           Req_err; // return of RequestCoefficients()
+typedef enum {PRINT_NORMAL = 30, PRINT_NROOT_ERROR}                    Print_err; // return of PrintRoots()
+typedef enum {GET_NORMAL = 40, GET_INPUT_ERROR}                          get_err; // return of GetCoefficients()
 typedef enum {NO_ROOTS = 0, ONE_ROOT = 1, TWO_ROOTS = 2, INF_ROOTS = -2} Roots_c; // return od Solve___()
-typedef enum {PRINT_NORMAL, PRINT_NROOT_ERROR}                         Print_err; // return of PrintRoots()
 
 
 #define ON  1
@@ -72,15 +73,16 @@ typedef enum {PRINT_NORMAL, PRINT_NROOT_ERROR}                         Print_err
     #define assert(condition)
 #endif
 
-struct {
-    unsigned int FILE_INPUT_FLAG : 1;
-    unsigned int CONSOLE_INPUT_FLAG : 1;
-    unsigned int PRELIMINARY_TESTING_FLAG : 1;
-} COMMAND_LINE_FLAGS = {};
+struct Flags {
+    unsigned int file_input_flag : 1;
+    unsigned int console_input_flag : 1;
+    unsigned int preliminary_testing_flag : 1;
+};
 //char COMMAND_LINE_FLAGS_LIST[] = "fct";
 
 struct Expected_sq_result {int n_roots; double root_1; double root_2;};
 struct Conformity_sq_result {bool n_roots, root_1, root_2;};
+struct Quadratic_coefficients {double a; double b; double c;};
 
 
 /**
@@ -89,7 +91,7 @@ struct Conformity_sq_result {bool n_roots, root_1, root_2;};
  * @param[in] argc argc from command line
  * @param[in] agrv argv from command line
  */
-void HandleArg(const int argc, const char* argv[]);
+Flags HandleArg(const int argc, const char* argv[]);
 
 
 /**
@@ -104,10 +106,8 @@ int RunFileTests(void);
  *
  * @param[in] error_type  error number
  * @param[in] test_number number of failed test
- *
- * @return error_type converted to int
  */
-int PrintErrorMessage(const Ftest_err error_type, const int test_number);
+void PrintErrorMessage(const Ftest_err error_type, const int test_number);
 
 /**
  * @brief do test of SolveQuadratic() using values from parameters
@@ -120,8 +120,7 @@ int PrintErrorMessage(const Ftest_err error_type, const int test_number);
  *
  * @return 1 if test is successful or 0 otherwise
  */
-int RunTest(const double coef_a, const double coef_b, const double coef_c,
-            const Expected_sq_result exp, const int test_number);
+int RunTest(const Quadratic_coefficients coef, const Expected_sq_result exp, const int test_number);
 
 /**
  * @brief swap a from p_a and b from_p_b
@@ -143,10 +142,11 @@ void Swap(double* const p_a, double* const p_b);
  * @param[in] exp     structure containing expected values
  * @param[in] conf    structure containing information about conformity between got and expected values
  */
-void PrintFailed(const double coef_a, const double coef_b, const double coef_c,
-                 const int n_roots, const double root_1, const double root_2,
+void PrintFailed(const Quadratic_coefficients coef, const int n_roots, const double root_1, const double root_2,
                  const Expected_sq_result exp, const Conformity_sq_result conf, const int test_number);
 
+
+get_err GetCoefficients(Quadratic_coefficients* p_coef,Flags command_line_flags); //TODO doc there end fix everywhere with struct coef
 
 /**
  * @brief ask the user to choose input type
@@ -162,9 +162,9 @@ Input_type AskInputType(void);
  * @param[out] p_coef_b pointer to coefficient b of quadratic equation
  * @param[out] p_coef_c pointer to coefficient c of quadratic equation
  *
- * @return FREQ_NORMAL or error number
+ * @return FREQ_NORMAL or exit with error number
  */
-Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b, double* const p_coef_c);
+Freq_err FileRequestCoefficients(Quadratic_coefficients* p_coef);
 
 /**
  * @brief Ask the user to write name of file until this is in correct form.
@@ -180,9 +180,9 @@ char* GetFilename(void);
  * @param[out] p_coef_b pointer to coefficient b of quadratic equation
  * @param[out] p_coef_c pointer to coefficient c of quadratic equation
  *
- * @return REQ_NORMAL or error number
+ * @return REQ_NORMAL or exit with error number
  */
-Req_err RequestCoefficients(double* const p_coef_a, double* const p_coef_b, double* const p_coef_c);
+Req_err RequestCoefficients(Quadratic_coefficients* p_coef);
 
 /**
  * @brief ask the user to write Y or N unless he do it
@@ -212,7 +212,7 @@ void ClearInputBuf(void);
  *
  * @note If equation has only one solution, it will be written to addres proot1
  */
-Roots_c SolveQuadratic(const double coef_a, const double coef_b, const double coef_c, double* const p_root1, double* const p_root2);
+Roots_c SolveQuadratic(const Quadratic_coefficients coef, double* const p_root1, double* const p_root2);
 
 /**
  * @brief find the solution of linear equation with coefficients coef_a, coef_b
@@ -262,6 +262,6 @@ bool IsNAN(double lf);
  * @param[in] p_roor_1 first root of quadratic equation
  * @param[in] p_roor_2 second root of quadratic equation
  *
- * @return PRINT_NORMAL or error number
+ * @return PRINT_NORMAL or exit with error number
  */
 Print_err PrintRoots(Roots_c n_roots, const double root_1, const double root_2);

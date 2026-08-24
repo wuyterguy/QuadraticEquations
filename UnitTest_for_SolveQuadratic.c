@@ -3,14 +3,15 @@ int RunFileTests() {
 
     if (tests_file == NULL) {
         fclose(tests_file);
-        return PrintErrorMessage(FTEST_FOPEN_ERROR, 0);
+        PrintErrorMessage(FTEST_FOPEN_ERROR, 0);
+        exit(FTEST_FOPEN_ERROR);
     }
 
     Ftest_err error_type = FTEST_NORMAL;
 
     int successful_tests = 0, tests_count = 0;
 
-    double coef_a = NAN, coef_b = NAN, coef_c = NAN;
+    Quadratic_coefficients coef = {NAN, NAN, NAN};
     Expected_sq_result exp = {(int)NO_ROOTS, NAN, NAN};
 
     char line[MAX_TEST_LINE_LONG] = {};
@@ -23,7 +24,7 @@ int RunFileTests() {
         exp.root_2 = NAN;
         symbols_read = 0;
 
-        if (sscanf(line, "%lf %lf %lf %d%n", &coef_a, &coef_b, &coef_c, &exp.n_roots, &symbols_read) != 4) {
+        if (sscanf(line, "%lf %lf %lf %d%n", &coef.a, &coef.b, &coef.c, &exp.n_roots, &symbols_read) != 4) {
             error_type = FTEST_INPUT_ERROR;
             break;
         }
@@ -45,7 +46,7 @@ int RunFileTests() {
             break;
         }
 
-        successful_tests += RunTest(coef_a, coef_b, coef_c, exp, tests_count);
+        successful_tests += RunTest(coef, exp, tests_count);
     }
 
     if (ferror(tests_file))
@@ -53,12 +54,13 @@ int RunFileTests() {
 
     fclose(tests_file);
     if (error_type != FTEST_NORMAL)
-        return PrintErrorMessage(error_type, tests_count);
+        PrintErrorMessage(error_type, tests_count);
+        exit(error_type);
     return successful_tests * HUNDRED_PERCENT / tests_count;
 }
 
 
-int PrintErrorMessage(const Ftest_err error_type, const int test_number) {
+void PrintErrorMessage(const Ftest_err error_type, const int test_number) {
     if (error_type == FTEST_FOPEN_ERROR) {
         printf("File " Color(TESTFILE, YEL) " doesn't exist or you don't have \"r\" permission\n");
     }
@@ -73,15 +75,12 @@ int PrintErrorMessage(const Ftest_err error_type, const int test_number) {
     if (error_type == FTEST_READ_ERROR) {
         printf("File " Color(TESTFILE, YEL) " - error during the reading\n");
     }
-
-    return (int)error_type;
 }
 
 
-int RunTest(const double coef_a, const double coef_b, const double coef_c,
-            const Expected_sq_result exp, const int test_number) {
+int RunTest(const Quadratic_coefficients coef, const Expected_sq_result exp, const int test_number) {
     double root_1 = NAN, root_2 = NAN;
-    Roots_c n_roots = SolveQuadratic(coef_a, coef_b, coef_c, &root_1, &root_2);
+    Roots_c n_roots = SolveQuadratic(coef, &root_1, &root_2);
 
     Conformity_sq_result conf {false, false, false};
 
@@ -102,7 +101,7 @@ int RunTest(const double coef_a, const double coef_b, const double coef_c,
     if (conf.n_roots && conf.root_1 && conf.root_2)
         return 1;
     else { /* discrepancy between exp and got */
-        PrintFailed(coef_a, coef_b, coef_c, n_roots, root_1, root_2, exp, conf, test_number);
+        PrintFailed(coef, n_roots, root_1, root_2, exp, conf, test_number);
         return 0;
     }
 }
@@ -119,13 +118,12 @@ void Swap(double* const p_a, double* const p_b) {
 }
 
 
-void PrintFailed(const double coef_a, const double coef_b, const double coef_c,
-                 const int n_roots, const double root_1, const double root_2,
+void PrintFailed(const Quadratic_coefficients coef, const int n_roots, const double root_1, const double root_2,
                  const Expected_sq_result exp, const Conformity_sq_result conf, const int test_number) {
     printf("Test " Color("%d", MAG) " " Color("FAILED", RED) "\n", test_number);
 
     printf("coefficients: a = " Color("%.5lf", MAG) "; b = " Color("%.5lf", MAG) "; c = " Color("%.5lf", MAG) "\n",
-           coef_a, coef_b, coef_c);
+           coef.a, coef.b, coef.c);
 
     printf("expected: n_roots code = " Color("%-2d", MAG) "; ", exp.n_roots);
 

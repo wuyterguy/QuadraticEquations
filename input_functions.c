@@ -1,9 +1,27 @@
-Input_type AskInputType() {
-    if (COMMAND_LINE_FLAGS.FILE_INPUT_FLAG & !COMMAND_LINE_FLAGS.CONSOLE_INPUT_FLAG)
-        return FILE_INPUT;
-    if (COMMAND_LINE_FLAGS.CONSOLE_INPUT_FLAG & !COMMAND_LINE_FLAGS.FILE_INPUT_FLAG)
-        return CONSOLE_INPUT;
+get_err GetCoefficients(Quadratic_coefficients* coef,Flags command_line_flags) {
+    printf("Quadratic equations solver by " Color("Zotov Anton", YEL) "\n");
 
+    Input_type input_type;
+
+    if (command_line_flags.file_input_flag & !command_line_flags.console_input_flag)
+        input_type = FILE_INPUT;
+    else if (command_line_flags.console_input_flag & !command_line_flags.file_input_flag)
+        input_type = CONSOLE_INPUT;
+    else
+        input_type = AskInputType();
+
+    if (input_type == FILE_INPUT)
+        (void)FileRequestCoefficients(coef);
+    else if (input_type == CONSOLE_INPUT)
+        (void)RequestCoefficients(coef);
+    else
+        exit(GET_INPUT_ERROR);
+
+    return GET_NORMAL;
+}
+
+
+Input_type AskInputType() {
     printf("Would you like to use file input from file? (write "
            Color("Y", MAG) " or " Color("N", MAG) ")\n");
     printf("If you write N it will be console input\n");
@@ -13,20 +31,22 @@ Input_type AskInputType() {
         return FILE_INPUT;
     else if (ask_result == NO)
         return CONSOLE_INPUT;
-    else
+    else {
+        printf("End of input file\n");
         return TYPE_ERROR;
+    }
 }
 //TODO clear output
 
-Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b, double* const p_coef_c) {
-    assert(p_coef_a != NULL);
-    assert(p_coef_b != NULL);
-    assert(p_coef_c != NULL);
-    assert(p_coef_a != p_coef_b && p_coef_a != p_coef_c && p_coef_b != p_coef_c);
+Freq_err FileRequestCoefficients(Quadratic_coefficients* coef) {
+    assert(&coef->a != NULL);
+    assert(&coef->b != NULL);
+    assert(&coef->c != NULL);
+    assert(&coef->a != &coef->b && &coef->a != &coef->c && &coef->b != &coef->c);
 
     Freq_err error_type = FREQ_NORMAL;
 
-    while(1) {                                          // request the correct file unless input is possible to read 3 coefficients or program is closed
+    while (1) {                                          // request the correct file unless input is possible to read 3 coefficients or program is closed
         printf("Enter a filename like: " Color("coefficients.txt", YEL)
                " (press " Color("Enter", MAG) " to use default file)" "\n");
 
@@ -38,7 +58,7 @@ Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b,
         if (coefficients_file == NULL)
             error_type = FREQ_FOPEN_ERROR;
         else { /* (coefficients_file != NULL) */
-            if (fscanf(coefficients_file, "%lf %lf %lf", p_coef_a, p_coef_b, p_coef_c) != 3)
+            if (fscanf(coefficients_file, "%lf %lf %lf", &coef->a, &coef->b, &coef->c) != 3)
                 error_type = FREQ_INPUT_ERROR;
 
             if (ferror(coefficients_file)) {
@@ -46,7 +66,7 @@ Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b,
 
                 fclose(coefficients_file);
                 free(filename);
-                return FREQ_READ_ERROR;
+                exit(FREQ_READ_ERROR);
             }
         }
 
@@ -67,9 +87,11 @@ Freq_err FileRequestCoefficients(double* const p_coef_a, double* const p_coef_b,
             if (ask_result == YES)
                 continue;
             else if (ask_result == NO)
-                return FREQ_STOP_PROGRAM;
-            else
-                return FREQ_INPUT_ERROR;
+                exit(FREQ_STOP_PROGRAM);
+            else {
+                printf("End of input file\n");
+                exit(FREQ_INPUT_ERROR);
+            }
         }
         else /* (error_type == FREQ_NORMAL) => everything is correct */
             break;
@@ -120,14 +142,14 @@ char* GetFilename() {
             ClearInputBuf();
         printf("Enter a filename like: " Color("coefficients.txt", YEL) "\n");
     }
-}
+} //TODO txlib sfml raylib
 
 
-Req_err RequestCoefficients(double* const p_coef_a, double* const p_coef_b, double* const p_coef_c) {
-    assert(p_coef_a != NULL);
-    assert(p_coef_b != NULL);
-    assert(p_coef_c != NULL);
-    assert(p_coef_a != p_coef_b && p_coef_a != p_coef_c && p_coef_b != p_coef_c);
+Req_err RequestCoefficients(Quadratic_coefficients* coef) {
+    assert(&coef->a != NULL);
+    assert(&coef->b != NULL);
+    assert(&coef->c != NULL);
+    assert(&coef->a != &coef->b && &coef->a != &coef->c && &coef->b != &coef->c);
 
     int first_symb = 0;
 
@@ -136,15 +158,15 @@ Req_err RequestCoefficients(double* const p_coef_a, double* const p_coef_b, doub
                " (press " Color("Enter", MAG) " to use coefficients from example)" "\n");
 
         if((first_symb = getchar()) == '\n'){
-            *p_coef_a = 1;
-            *p_coef_b = 5;
-            *p_coef_c = 6;
+            coef->a = 1;
+            coef->b = 5;
+            coef->c = 6;
             return REQ_NORMAL;
         }
         else
             ungetc(first_symb, stdin);
 
-        if (scanf("%lf %lf %lf", p_coef_a, p_coef_b, p_coef_c) != 3) {
+        if (scanf("%lf %lf %lf", &coef->a, &coef->b, &coef->c) != 3) {
             ClearInputBuf();             // clear the input buffer from excess symbols
 
             printf(Color("RequestCoefficients:", YEL) "There must be three coefficients like: "
@@ -156,9 +178,11 @@ Req_err RequestCoefficients(double* const p_coef_a, double* const p_coef_b, doub
             if (ask_result == YES)
                 continue;
             else if (ask_result == NO)
-                return REQ_STOP_PROGRAM;
-            else
-                return REQ_INPUT_ERROR;
+                exit(REQ_STOP_PROGRAM);
+            else {
+                printf("End of input file\n");
+                exit(REQ_INPUT_ERROR);
+            }
 
         }
         else /* number of arguments is 3 => input is correct */
@@ -183,8 +207,10 @@ Answer AskYesOrNo() {
             result = YES;
         else if (got_symb == 'N')
             result = NO;
-        else if ((got_symb == '\n') || (got_symb == EOF))
+        else if (got_symb == '\n')
             clear = false;                                                     // buffer is empty
+        else if (got_symb == EOF)
+            return NONE;
         if (result != NONE) {
             while (((got_symb = getchar()) == ' ') || (got_symb == '\t'));     // skip spaces
             if ((got_symb == '\n') || (got_symb == EOF))
