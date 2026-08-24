@@ -14,7 +14,7 @@ Input_type AskInputType() {
     else if (ask_result == NO)
         return CONSOLE_INPUT;
     else
-        return ERROR;
+        return TYPE_ERROR;
 }
 //TODO clear output
 

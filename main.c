@@ -11,7 +11,7 @@ int main(const int argc, const char* argv[]) {
         if (ftest_res < 0)
             return MAIN_TESTING_ERROR;
 
-        if (ftest_res < 100) { //TODO mac
+        if (ftest_res < HUNDRED_PERCENT) {
             printf(Color("%d%%", MAG) " successful file tests\n", ftest_res);
             printf("SolveQuadratic: test failed\n");
             return MAIN_NORMAL;

@@ -54,7 +54,7 @@ int RunFileTests() {
     fclose(tests_file);
     if (error_type != FTEST_NORMAL)
         return PrintErrorMessage(error_type, tests_count);
-    return successful_tests * PERCENT / tests_count;
+    return successful_tests * HUNDRED_PERCENT / tests_count;
 }
 
 
