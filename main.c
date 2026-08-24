@@ -6,20 +6,14 @@
 int main(const int argc, const char* argv[]) {
     Flags command_line_flags = HandleArg(argc, argv);
 
-    if (command_line_flags.preliminary_testing_flag) {
-        int ftest_res = RunFileTests();
-        if (ftest_res < HUNDRED_PERCENT) {
-            printf("SolveQuadratic: testing failed\n");
-            printf(Color("%d%%", MAG) " successful file tests\n", ftest_res);
-            return MAIN_NORMAL;
-        }
-    }
+    if (command_line_flags.preliminary_testing_flag)
+        (void)RunFileTests();
 
     Quadratic_coefficients coef = {NAN, NAN, NAN};
     (void)GetCoefficients(&coef, command_line_flags);
 
     double root_1 = NAN, root_2 = NAN;
-    Roots_c n_roots = SolveQuadratic(coef, &root_1, &root_2);
+    Roots_c_t n_roots = SolveQuadratic(coef, &root_1, &root_2);
 
     (void)PrintRoots(n_roots, root_1, root_2);
 
@@ -51,7 +45,7 @@ Flags HandleArg(const int argc, const char* argv[]) {
 }
 
 
-Print_err PrintRoots(Roots_c n_roots, const double root_1, const double root_2) {
+Print_err_t PrintRoots(Roots_c_t n_roots, const double root_1, const double root_2) {
     if(CmpEpsPrec(n_roots, TWO_ROOTS) && CmpEpsPrec(root_1, root_2))
         n_roots = ONE_ROOT;
 

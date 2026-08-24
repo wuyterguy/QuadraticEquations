@@ -4,25 +4,26 @@
 #include <math.h>
 #include <ctype.h>
 
-#define MAX_TEST_LINE_LONG 200
+#define MAX_TEST_LINE_LENGTH 200
 #define HUNDRED_PERCENT 100
 #define TESTFILE "tests_for_SolveQuadratic.txt"
-#define MAX_FILENAME_LONG 100
+#define DEFAULT_FILE "coefficients.txt"
+#define MAX_FILENAME_LENGTH 100
 #define EPSILON 0.00001                                                           // comparison accuracy
 
 enum {MAIN_NORMAL, MAIN_FILE_ERROR, MAIN_INPUT_ERROR,
       MAIN_NROOT_ERROR, MAIN_TESTING_ERROR};                                      // return of main()
 typedef enum {FTEST_NORMAL = 0, FTEST_EXP_NROOT_ERROR = -1, FTEST_INPUT_ERROR = -2,
-              FTEST_FOPEN_ERROR = -3, FTEST_READ_ERROR = -4}           Ftest_err; // return of RunFileTests()
-typedef enum {FILE_INPUT, CONSOLE_INPUT, TYPE_ERROR}                  Input_type; // return of AskInputType()
-typedef enum {NO = 0, YES = 1, NONE = 2}                                  Answer; // return of AskYesOrNo())
-typedef enum {FREQ_NORMAL = 10, FREQ_STOP_PROGRAM, FREQ_INPUT_ERROR,
-              FREQ_FOPEN_ERROR, FREQ_READ_ERROR}                        Freq_err; // return of FileRequestCoefficients()
-typedef enum {REQ_NORMAL = 20, REQ_STOP_PROGRAM,
-              REQ_INPUT_ERROR}                                           Req_err; // return of RequestCoefficients()
-typedef enum {PRINT_NORMAL = 30, PRINT_NROOT_ERROR}                    Print_err; // return of PrintRoots()
-typedef enum {GET_NORMAL = 40, GET_INPUT_ERROR}                          get_err; // return of GetCoefficients()
-typedef enum {NO_ROOTS = 0, ONE_ROOT = 1, TWO_ROOTS = 2, INF_ROOTS = -2} Roots_c; // return od Solve___()
+              FTEST_FOPEN_ERROR = -3, FTEST_READ_ERROR = -4}           Ftest_err_t; // return of RunFileTests()
+typedef enum {FILE_INPUT, CONSOLE_INPUT, TYPE_ERROR}                  Input_type_t; // return of AskInputType()
+typedef enum {NO = 0, YES = 1, NONE = 2}                                  Answer_t; // return of AskYesOrNo())
+typedef enum {FREQ_NORMAL = 0, FREQ_STOP_PROGRAM = 10, FREQ_INPUT_ERROR,
+              FREQ_FOPEN_ERROR, FREQ_READ_ERROR}                        Freq_err_t; // return of FileRequestCoefficients()
+typedef enum {REQ_NORMAL = 0, REQ_STOP_PROGRAM = 20,
+              REQ_INPUT_ERROR}                                           Req_err_t; // return of RequestCoefficients()
+typedef enum {PRINT_NORMAL = 0, PRINT_NROOT_ERROR = 30}                Print_err_t; // return of PrintRoots()
+typedef enum {GET_NORMAL = 0, GET_INPUT_ERROR = 40}                      get_err_t; // return of GetCoefficients()
+typedef enum {NO_ROOTS = 0, ONE_ROOT = 1, TWO_ROOTS = 2, INF_ROOTS = -2} Roots_c_t; // return od Solve___()
 
 
 #define ON  1
@@ -64,11 +65,13 @@ typedef enum {NO_ROOTS = 0, ONE_ROOT = 1, TWO_ROOTS = 2, INF_ROOTS = -2} Roots_c
 #define NDEBUG                                                                // switch assert off
 
 #ifndef NDEBUG
-    #define assert(condition)                                                                          \
-    if(!(condition)) {                                                                                 \
-        fprintf(stderr, "Assertion failed: " #condition ", file %s, line %d", __FILE__, __LINE__);     \
-        abort();                                                                                       \
-    }
+    #define assert(condition)                                                                              \
+    do {                                                                                                   \
+        if(!(condition)) {                                                                                 \
+            fprintf(stderr, "Assertion failed: " #condition ", file %s, line %d", __FILE__, __LINE__);     \
+            abort();                                                                                       \
+        }                                                                                                  \
+    } while (0);
 #else
     #define assert(condition)
 #endif
@@ -109,7 +112,7 @@ int RunFileTests(void);
  * @param[in] error_type  error number
  * @param[in] test_number number of failed test
  */
-void PrintErrorMessage(const Ftest_err error_type, const int test_number);
+void PrintErrorMessage(const Ftest_err_t error_type, const int test_number);
 
 /**
  * @brief do test of SolveQuadratic() using values from parameters
@@ -151,14 +154,14 @@ void PrintFailed(const Quadratic_coefficients coef, const int n_roots, const dou
  *
  * @return GET_NORMAL or exit with error number
  */
-get_err GetCoefficients(Quadratic_coefficients* coef,Flags command_line_flags);
+get_err_t GetCoefficients(Quadratic_coefficients* coef,Flags command_line_flags);
 
 /**
  * @brief ask the user to choose input type
  *
  * @return FILE_INPUT or CONSOLE_INPUT or TYPE_ERROR if there is error
  */
-Input_type AskInputType(void);
+Input_type_t AskInputType(void);
 
 /**
  * @brief transmit three values from coefficients.txt to addresses coef
@@ -167,7 +170,7 @@ Input_type AskInputType(void);
  *
  * @return FREQ_NORMAL or exit with error number
  */
-Freq_err FileRequestCoefficients(Quadratic_coefficients* coef);
+Freq_err_t FileRequestCoefficients(Quadratic_coefficients* coef);
 
 /**
  * @brief Ask the user to write name of file until this is in correct form.
@@ -183,14 +186,14 @@ char* GetFilename(void);
  *
  * @return REQ_NORMAL or exit with error number
  */
-Req_err RequestCoefficients(Quadratic_coefficients* coef);
+Req_err_t RequestCoefficients(Quadratic_coefficients* coef);
 
 /**
  * @brief ask the user to write Y or N unless he do it
  *
  * @return YES if answer is Y or  if answer is N
  */
-Answer AskYesOrNo(void);
+Answer_t AskYesOrNo(void);
 
 /**
  * @brief clear the input buffer from excess symbols
@@ -211,7 +214,7 @@ void ClearInputBuf(void);
  *
  * @note If equation has only one solution, it will be written to addres proot1
  */
-Roots_c SolveQuadratic(const Quadratic_coefficients coef, double* const p_root1, double* const p_root2);
+Roots_c_t SolveQuadratic(const Quadratic_coefficients coef, double* const p_root1, double* const p_root2);
 
 /**
  * @brief find the solution of linear equation with coefficients coef_a, coef_b
@@ -222,7 +225,7 @@ Roots_c SolveQuadratic(const Quadratic_coefficients coef, double* const p_root1,
  *
  * @return the number of solutions or INF_ROOTS if there are infinite
  */
-Roots_c SolveLinear(const double coef_a, const double coef_b, double* const p_root);
+Roots_c_t SolveLinear(const double coef_a, const double coef_b, double* const p_root);
 
 /**
  * @brief divide dividend/divider preventing the return of -0.0
@@ -263,4 +266,4 @@ bool IsNAN(double lf);
  *
  * @return PRINT_NORMAL or exit with error number
  */
-Print_err PrintRoots(Roots_c n_roots, const double root_1, const double root_2);
+Print_err_t PrintRoots(Roots_c_t n_roots, const double root_1, const double root_2);

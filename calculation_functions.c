@@ -1,4 +1,4 @@
-Roots_c SolveQuadratic(const Quadratic_coefficients coef,
+Roots_c_t SolveQuadratic(const Quadratic_coefficients coef,
                        double* const p_root1, double* const p_root2) {
     assert(p_root1 != NULL);
     assert(p_root2 != NULL);
@@ -8,15 +8,15 @@ Roots_c SolveQuadratic(const Quadratic_coefficients coef,
         return SolveLinear(coef.b, coef.c, p_root1);
     }
     else { /* (coef.a != 0.0) => it's quadric education */
-        double discr = coef.b*coef.b - 4*coef.a*coef.c;
+        double discr = coef.b * coef.b - 4 * coef.a * coef.c;
         if (CmpEpsPrec(discr, 0.0)) {
-            *p_root1 = DivideSmart(-coef.b, 2*coef.a);
+            *p_root1 = DivideSmart(-coef.b, 2 * coef.a);
             return ONE_ROOT;
         }
         else if (discr > 0.0) {
             double sq_discr = sqrt(discr);
-            *p_root1 = DivideSmart(-coef.b + sq_discr, 2*coef.a);
-            *p_root2 = DivideSmart(-coef.b - sq_discr, 2*coef.a);
+            *p_root1 = DivideSmart(-coef.b + sq_discr, 2 * coef.a);
+            *p_root2 = DivideSmart(-coef.b - sq_discr, 2 * coef.a);
             return TWO_ROOTS;
         }
         else { /* (discr < 0.0) => there is no solutions */
@@ -26,7 +26,7 @@ Roots_c SolveQuadratic(const Quadratic_coefficients coef,
 }
 
 
-Roots_c SolveLinear(const double coef_a, const double coef_b, double* const p_root) {
+Roots_c_t SolveLinear(const double coef_a, const double coef_b, double* const p_root) {
     assert(p_root != NULL);
 
     if (CmpEpsPrec(coef_a, 0.0)) {
@@ -65,19 +65,19 @@ bool IsNAN(double lf) {
     bool result = false;
     unsigned char* pointer_to_start = (unsigned char*)&lf + sizeof(double);
 
-    for (unsigned char* pointer_to_bite = pointer_to_start - 3;
-         pointer_to_bite >= pointer_to_start - 8; pointer_to_bite--) {
-        if (*pointer_to_bite != 0b00000000){                              // 13rd - 64th bites must contain
+    for (unsigned char* pointer_to_byte = pointer_to_start - 3;
+         pointer_to_byte >= pointer_to_start - 8; pointer_to_byte--) {
+        if (*pointer_to_byte != 0b00000000){                              // 13rd - 64th bits must contain
             result = true;                                                // at least one bit with 1 value
             break;
         }
     }
 
-    if ((unsigned char)(*(pointer_to_start - 2) << 4) != 0)               // 13rd - 64th bites must contain
+    if ((unsigned char)(*(pointer_to_start - 2) << 4) != 0)               // 13rd - 64th bits must contain
         result = true;                                                    // at least one bit with 1 value
 
-    if (((unsigned char)(*(pointer_to_start - 1) << 1) != 0b11111110) ||  // 1st bite must be ?1111111
-        ((unsigned char)(*(pointer_to_start - 2) >> 4) != 0b00001111))    // 2nd bite must be 1111????
+    if (((unsigned char)(*(pointer_to_start - 1) << 1) != 0b11111110) ||  // 1st byte must be ?1111111
+        ((unsigned char)(*(pointer_to_start - 2) >> 4) != 0b00001111))    // 2nd byte must be 1111????
         result = false;
 
     return result;

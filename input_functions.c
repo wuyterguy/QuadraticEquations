@@ -1,7 +1,7 @@
-get_err GetCoefficients(Quadratic_coefficients* coef,Flags command_line_flags) {
+get_err_t GetCoefficients(Quadratic_coefficients* coef,Flags command_line_flags) {
     printf("Quadratic equations solver by " Color("Zotov Anton", YEL) "\n");
 
-    Input_type input_type;
+    Input_type_t input_type = CONSOLE_INPUT;
 
     if (command_line_flags.file_input_flag & !command_line_flags.console_input_flag)
         input_type = FILE_INPUT;
@@ -21,12 +21,12 @@ get_err GetCoefficients(Quadratic_coefficients* coef,Flags command_line_flags) {
 }
 
 
-Input_type AskInputType() {
+Input_type_t AskInputType() {
     printf("Would you like to use file input from file? (write "
            Color("Y", MAG) " or " Color("N", MAG) ")\n");
     printf("If you write N it will be console input\n");
 
-    Answer ask_result = AskYesOrNo();
+    Answer_t ask_result = AskYesOrNo();
     if (ask_result == YES)
         return FILE_INPUT;
     else if (ask_result == NO)
@@ -38,16 +38,16 @@ Input_type AskInputType() {
 }
 
 
-Freq_err FileRequestCoefficients(Quadratic_coefficients* coef) {
+Freq_err_t FileRequestCoefficients(Quadratic_coefficients* coef) {
     assert(&coef->a != NULL);
     assert(&coef->b != NULL);
     assert(&coef->c != NULL);
     assert(&coef->a != &coef->b && &coef->a != &coef->c && &coef->b != &coef->c);
 
-    Freq_err error_type = FREQ_NORMAL;
+    Freq_err_t error_type = FREQ_NORMAL;
 
     while (1) {                                          // request the correct file unless input is possible to read 3 coefficients or program is closed
-        printf("Enter a filename like: " Color("coefficients.txt", YEL)
+        printf("Enter a filename like: " Color(DEFAULT_FILE, YEL)
                " (press " Color("Enter", MAG) " to use default file)" "\n");
 
         char* filename = GetFilename();
@@ -83,7 +83,7 @@ Freq_err FileRequestCoefficients(Quadratic_coefficients* coef) {
             fclose(coefficients_file);
             free(filename);
 
-            Answer ask_result = AskYesOrNo();
+            Answer_t ask_result = AskYesOrNo();
             if (ask_result == YES)
                 continue;
             else if (ask_result == NO)
@@ -106,18 +106,17 @@ Freq_err FileRequestCoefficients(Quadratic_coefficients* coef) {
 
 char* GetFilename() {
     int got_symb = 0;
-    char* filename = (char*) calloc(MAX_FILENAME_LONG, sizeof(char));
+    char* filename = (char*) calloc(MAX_FILENAME_LENGTH, sizeof(char));
+    assert(filename != NULL);
     char* name_end = filename;
-    bool clear = true;
 
     while (1) {                                                                          // request answer unless it is correct
         name_end = filename;
-        clear = true;
         while (((got_symb = getchar()) == ' ') || (got_symb == '\t'));                   // skip spaces
 
         if (!isalpha(got_symb)) {                                                        // first symbol is not letter
             if (got_symb == '\n') {                                                      // return default value
-                strcpy(filename, "coefficients.txt");
+                strncpy(filename, DEFAULT_FILE, MAX_FILENAME_LENGTH);
                 return filename;
             }
             if (got_symb == EOF)
@@ -138,14 +137,13 @@ char* GetFilename() {
 
         CLEAR_BUF_AND_REPRINT: /* from goto */
 
-        if (clear)
-            ClearInputBuf();
-        printf("Enter a filename like: " Color("coefficients.txt", YEL) "\n");
+        ClearInputBuf();
+        printf("Enter a filename like: " Color(DEFAULT_FILE, YEL) "\n");
     }
 }
 
 
-Req_err RequestCoefficients(Quadratic_coefficients* coef) {
+Req_err_t RequestCoefficients(Quadratic_coefficients* coef) {
     assert(&coef->a != NULL);
     assert(&coef->b != NULL);
     assert(&coef->c != NULL);
@@ -166,7 +164,7 @@ Req_err RequestCoefficients(Quadratic_coefficients* coef) {
         else
             ungetc(first_symb, stdin);
 
-        if (scanf("%lf %lf %lf", &coef->a, &coef->b, &coef->c) != 3) {
+        if (scanf("%lf %lf %lf", &coef->a, &coef->b, &coef->c) != 3) {  // TODO think
             ClearInputBuf();             // clear the input buffer from excess symbols
 
             printf(Color("RequestCoefficients:", YEL) "There must be three coefficients like: "
@@ -174,7 +172,7 @@ Req_err RequestCoefficients(Quadratic_coefficients* coef) {
             printf("Do you want to try again? (write " Color("Y", MAG) " if you do or "
                    Color("N", MAG) " otherwise)\n");
 
-            Answer ask_result = AskYesOrNo();
+            Answer_t ask_result = AskYesOrNo();
             if (ask_result == YES)
                 continue;
             else if (ask_result == NO)
@@ -193,9 +191,9 @@ Req_err RequestCoefficients(Quadratic_coefficients* coef) {
 }
 
 
-Answer AskYesOrNo() {
+Answer_t AskYesOrNo() {
     int got_symb = 0;
-    Answer result = NONE;
+    Answer_t result = NONE;
     bool clear = true;
 
     while (1) {                                                                // request answer unless it is correct

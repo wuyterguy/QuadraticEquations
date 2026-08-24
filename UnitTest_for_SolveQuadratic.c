@@ -7,14 +7,14 @@ int RunFileTests() {
         exit(FTEST_FOPEN_ERROR);
     }
 
-    Ftest_err error_type = FTEST_NORMAL;
+    Ftest_err_t error_type = FTEST_NORMAL;
 
     int successful_tests = 0, tests_count = 0;
 
     Quadratic_coefficients coef = {NAN, NAN, NAN};
     Expected_sq_result exp = {(int)NO_ROOTS, NAN, NAN};
 
-    char line[MAX_TEST_LINE_LONG] = {};
+    char line[MAX_TEST_LINE_LENGTH] = {};
     int symbols_read = 0;
 
     while (fgets(line, sizeof(line), tests_file) != NULL) {
@@ -53,14 +53,23 @@ int RunFileTests() {
         error_type = FTEST_FOPEN_ERROR;
 
     fclose(tests_file);
-    if (error_type != FTEST_NORMAL)
+    if (error_type != FTEST_NORMAL) {
         PrintErrorMessage(error_type, tests_count);
         exit(error_type);
-    return successful_tests * HUNDRED_PERCENT / tests_count;
+    }
+
+    int ftest_result = successful_tests * HUNDRED_PERCENT / tests_count;
+    if (ftest_result < HUNDRED_PERCENT) {
+        printf("SolveQuadratic: testing failed\n");
+        printf(Color("%d%%", MAG) " successful file tests\n", ftest_result);
+        exit(MAIN_NORMAL);
+    }
+
+    return FTEST_NORMAL;
 }
 
 
-void PrintErrorMessage(const Ftest_err error_type, const int test_number) {
+void PrintErrorMessage(const Ftest_err_t error_type, const int test_number) {
     if (error_type == FTEST_FOPEN_ERROR) {
         printf("File " Color(TESTFILE, YEL) " doesn't exist or you don't have \"r\" permission\n");
     }
@@ -70,7 +79,7 @@ void PrintErrorMessage(const Ftest_err error_type, const int test_number) {
     }
     if (error_type == FTEST_EXP_NROOT_ERROR) {
         printf(Color("RunFileTest", YEL) ": " Color(TESTFILE, YEL) ": test "
-               Color("%d", MAG) ": There must be value of type Roots_c like: " Color("1 2 1 >1< -1", MAG) "\n", test_number);
+               Color("%d", MAG) ": There must be value of type Roots_c_t like: " Color("1 2 1 >1< -1", MAG) "\n", test_number);
     }
     if (error_type == FTEST_READ_ERROR) {
         printf("File " Color(TESTFILE, YEL) " - error during the reading\n");
@@ -80,7 +89,7 @@ void PrintErrorMessage(const Ftest_err error_type, const int test_number) {
 
 int RunTest(const Quadratic_coefficients coef, const Expected_sq_result exp, const int test_number) {
     double root_1 = NAN, root_2 = NAN;
-    Roots_c n_roots = SolveQuadratic(coef, &root_1, &root_2);
+    Roots_c_t n_roots = SolveQuadratic(coef, &root_1, &root_2);
 
     Conformity_sq_result conf {false, false, false};
 
