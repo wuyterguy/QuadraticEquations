@@ -130,14 +130,14 @@ void PrintFailed(const double coef_a, const double coef_b, const double coef_c,
     printf("expected: n_roots code = " Color("%-2d", MAG) "; ", exp.n_roots);
 
     printf("x1 = ");
-    if (isnan(exp.root_1))
+    if (IsNAN(exp.root_1))
         printf(Color("NAN        ", MAG));
     else
         printf(Color("%-11.5lf", MAG), exp.root_1);
     printf("; ");
 
     printf("x2 = ");
-    if (isnan(exp.root_2))
+    if (IsNAN(exp.root_2))
         printf(Color("NAN        ", MAG));
     else
         printf(Color("%-11.5lf", MAG), exp.root_2);
@@ -151,7 +151,7 @@ void PrintFailed(const double coef_a, const double coef_b, const double coef_c,
 
     printf("x1 = ");
     printf("%s", conf.root_1?MAG:RED);    // select color
-    if (isnan(root_1))
+    if (IsNAN(root_1))
         printf("NAN        ");
     else
         printf("%-11.5lf", root_1);
@@ -160,7 +160,7 @@ void PrintFailed(const double coef_a, const double coef_b, const double coef_c,
 
     printf("x2 = ");
     printf("%s", conf.root_2?MAG:RED);    // select color
-    if (isnan(root_2))
+    if (IsNAN(root_2))
         printf("NAN        ");
     else
         printf("%-11.5lf", root_2);

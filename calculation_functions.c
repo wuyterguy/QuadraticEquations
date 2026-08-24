@@ -54,7 +54,7 @@ double DivideSmart(const double dividend, const double divider) {
 
 bool CmpEpsPrec(const double a, const double b) {
     if ((fabs(a - b) <= EPSILON) ||
-        (isnan(a) && isnan(b)))
+        (IsNAN(a) && IsNAN(b)))
         return true;
     else
         return false;
@@ -73,11 +73,9 @@ bool IsNAN(double lf) {
         }
     }
 
-    if ((unsigned char)(*(pointer_to_start - 2) << 5) != 0)                  // 13rd - 64th bites must contain
+    if ((unsigned char)(*(pointer_to_start - 2) << 4) != 0)                  // 13rd - 64th bites must contain
         result = true;                                                       // at least one bit with 1 value
 
-    printf("%d ", *(pointer_to_start - 2));
-    printf("%d ", (*(pointer_to_start - 1)) << 1);
     if (((unsigned char)(*(pointer_to_start - 1) << 1) != 0b11111110) ||     // 1st bite must be ?1111111
         ((unsigned char)(*(pointer_to_start - 2) >> 4) != 0b00001111))       // 2nd bite must be 1111????
         result = false;
