@@ -9,29 +9,30 @@
 #define TESTFILE "tests_for_SolveQuadratic.txt"
 #define DEFAULT_FILE "coefficients.txt"
 #define MAX_FILENAME_LENGTH 100
-#define EPSILON 0.00001                                                           // comparison accuracy
+#define EPSILON 0.00001                                                         // comparison accuracy
 
+#define MAX_ERROR_COUNT 10
 enum {MAIN_NORMAL, MAIN_FILE_ERROR, MAIN_INPUT_ERROR,
-      MAIN_NROOT_ERROR, MAIN_TESTING_ERROR};                                      // return of main()
+      MAIN_NROOT_ERROR, MAIN_TESTING_ERROR};                                          // return of main()
 typedef enum {FTEST_NORMAL = 0, FTEST_EXP_NROOT_ERROR = -1, FTEST_INPUT_ERROR = -2,
-              FTEST_FOPEN_ERROR = -3, FTEST_READ_ERROR = -4}           Ftest_err_t; // return of RunFileTests()
-typedef enum {FILE_INPUT, CONSOLE_INPUT, TYPE_ERROR}                  Input_type_t; // return of AskInputType()
-typedef enum {NO = 0, YES = 1, NONE = 2}                                  Answer_t; // return of AskYesOrNo())
-typedef enum {FREQ_NORMAL = 0, FREQ_STOP_PROGRAM = 10, FREQ_INPUT_ERROR,
-              FREQ_FOPEN_ERROR, FREQ_READ_ERROR}                        Freq_err_t; // return of FileRequestCoefficients()
-typedef enum {REQ_NORMAL = 0, REQ_STOP_PROGRAM = 20,
-              REQ_INPUT_ERROR}                                           Req_err_t; // return of RequestCoefficients()
-typedef enum {PRINT_NORMAL = 0, PRINT_NROOT_ERROR = 30}                Print_err_t; // return of PrintRoots()
-typedef enum {GET_NORMAL = 0, GET_INPUT_ERROR = 40}                      get_err_t; // return of GetCoefficients()
-typedef enum {NO_ROOTS = 0, ONE_ROOT = 1, TWO_ROOTS = 2, INF_ROOTS = -2} Roots_c_t; // return od Solve___()
+              FTEST_FOPEN_ERROR = -3, FTEST_READ_ERROR = -4}             Ftest_err_t; // return of RunFileTests()
+typedef enum {FILE_INPUT, CONSOLE_INPUT, TYPE_ERROR}                    Input_type_t; // return of AskInputType()
+typedef enum {NO = 0, YES = 1, NONE = 2}                                    Answer_t; // return of AskYesOrNo())
+typedef enum {FREQ_NORMAL = 0, FREQ_STOP_PROGRAM = MAX_ERROR_COUNT * 1,
+              FREQ_INPUT_ERROR, FREQ_FOPEN_ERROR, FREQ_READ_ERROR}        Freq_err_t; // return of FileRequestCoefficients()
+typedef enum {REQ_NORMAL = 0, REQ_STOP_PROGRAM = MAX_ERROR_COUNT * 2,
+              REQ_INPUT_ERROR}                                             Req_err_t; // return of RequestCoefficients()
+typedef enum {PRINT_NORMAL = 0, PRINT_NROOT_ERROR = MAX_ERROR_COUNT * 3} Print_err_t; // return of PrintRoots()
+typedef enum {GET_NORMAL = 0, GET_INPUT_ERROR = MAX_ERROR_COUNT * 4}       get_err_t; // return of GetCoefficients()
+typedef enum {NO_ROOTS = 0, ONE_ROOT = 1, TWO_ROOTS = 2, INF_ROOTS = -2}   Roots_c_t; // return od Solve___()
 
 
 #define ON  1
 #define OFF 0
 
-#define COLOR_SWITCH ON                                                            // switch color output
+#define COLOR_SWITCH ON                                                         // switch color output
 
-#define SCREEN_CLEAR_SWITCH ON                                                     // switch clearing screen
+#define SCREEN_CLEAR_SWITCH ON                                                  // switch clearing screen
 
 #if COLOR_SWITCH == ON
     #define RED "\x1b[31m"
@@ -117,13 +118,13 @@ void PrintErrorMessage(const Ftest_err_t error_type, const int test_number);
 /**
  * @brief do test of SolveQuadratic() using values from parameters
  *
- * @param[in] coef        structure containing coefficients of quadratic equation
+ * @param[in] coef        pointer to structure containing coefficients of quadratic equation
  * @param[in] exp         structure containing expected values
  * @param[in] test_number number of current test
  *
  * @return 1 if test is successful or 0 otherwise
  */
-int RunTest(const Quadratic_coefficients coef, const Expected_sq_result exp, const int test_number);
+int RunTest(const Quadratic_coefficients* coef, const Expected_sq_result exp, const int test_number);
 
 /**
  * @brief swap a from p_a and b from_p_b
@@ -136,21 +137,21 @@ void Swap(double* const p_a, double* const p_b);
 /**
  * @brief print failed report
  *
- * @param[in] coef    structure containing coefficients of quadratic equation
+ * @param[in] coef    pointer to structure containing coefficients of quadratic equation
  * @param[in] n_roots number of roots
  * @param[in] roor_1  first root of quadratic equation
  * @param[in] roor_2  second root of quadratic equation
  * @param[in] exp     structure containing expected values
  * @param[in] conf    structure containing information about conformity between got and expected values
  */
-void PrintFailed(const Quadratic_coefficients coef, const int n_roots, const double root_1, const double root_2,
+void PrintFailed(const Quadratic_coefficients* coef, const int n_roots, const double root_1, const double root_2,
                  const Expected_sq_result exp, const Conformity_sq_result conf, const int test_number);
 
 
 /**
  * @brief get coefficients to addres coef by console or console depending on command_line_flags
  *
- * @param[in] coef pointer to structure containing coefficients of quadratic equation
+ * @param[out] coef pointer to structure containing coefficients of quadratic equation
  *
  * @return GET_NORMAL or exit with error number
  */
@@ -166,7 +167,7 @@ Input_type_t AskInputType(void);
 /**
  * @brief transmit three values from coefficients.txt to addresses coef
  *
- * @param[in] coef pointer to structure containing coefficients of quadratic equation
+ * @param[out] coef pointer to structure containing coefficients of quadratic equation
  *
  * @return FREQ_NORMAL or exit with error number
  */
@@ -182,7 +183,7 @@ char* GetFilename(void);
 /**
  * @brief transmit three values from input to addresses coef
  *
- * @param[in] coef pointer to structure containing coefficients of quadratic equation
+ * @param[out] coef pointer to structure containing coefficients of quadratic equation
  *
  * @return REQ_NORMAL or exit with error number
  */
@@ -206,7 +207,7 @@ void ClearInputBuf(void);
 /**
  * @brief find the solution of quadratic equation with coefficients coef_a, coef_b, coef_c
  *        and write them to the address proot1, proot2
- * @param[in] coef      structure containing coefficients of quadratic equation
+ * @param[in] coef      pointer to structure containing coefficients of quadratic equation
  * @param[out] p_roor_1 pointer to first root of quadratic equation
  * @param[out] p_roor_2 pointer to second root of quadratic equation
  *
@@ -214,7 +215,7 @@ void ClearInputBuf(void);
  *
  * @note If equation has only one solution, it will be written to addres proot1
  */
-Roots_c_t SolveQuadratic(const Quadratic_coefficients coef, double* const p_root1, double* const p_root2);
+Roots_c_t SolveQuadratic(const Quadratic_coefficients* coef, double* const p_root1, double* const p_root2);
 
 /**
  * @brief find the solution of linear equation with coefficients coef_a, coef_b

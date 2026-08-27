@@ -46,7 +46,7 @@ int RunFileTests() {
             break;
         }
 
-        successful_tests += RunTest(coef, exp, tests_count);
+        successful_tests += RunTest(&coef, exp, tests_count);
     }
 
     if (ferror(tests_file))
@@ -87,7 +87,7 @@ void PrintErrorMessage(const Ftest_err_t error_type, const int test_number) {
 }
 
 
-int RunTest(const Quadratic_coefficients coef, const Expected_sq_result exp, const int test_number) {
+int RunTest(const Quadratic_coefficients* coef, const Expected_sq_result exp, const int test_number) {
     double root_1 = NAN, root_2 = NAN;
     Roots_c_t n_roots = SolveQuadratic(coef, &root_1, &root_2);
 
@@ -127,12 +127,12 @@ void Swap(double* const p_a, double* const p_b) {
 }
 
 
-void PrintFailed(const Quadratic_coefficients coef, const int n_roots, const double root_1, const double root_2,
+void PrintFailed(const Quadratic_coefficients* coef, const int n_roots, const double root_1, const double root_2,
                  const Expected_sq_result exp, const Conformity_sq_result conf, const int test_number) {
     printf("Test " Color("%d", MAG) " " Color("FAILED", RED) "\n", test_number);
 
     printf("coefficients: a = " Color("%.5lf", MAG) "; b = " Color("%.5lf", MAG) "; c = " Color("%.5lf", MAG) "\n",
-           coef.a, coef.b, coef.c);
+           coef->a, coef->b, coef->c);
 
     printf("expected: n_roots code = " Color("%-2d", MAG) "; ", exp.n_roots);
 

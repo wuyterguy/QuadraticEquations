@@ -13,7 +13,7 @@ int main(const int argc, const char* argv[]) {
     (void)GetCoefficients(&coef, command_line_flags);
 
     double root_1 = NAN, root_2 = NAN;
-    Roots_c_t n_roots = SolveQuadratic(coef, &root_1, &root_2);
+    Roots_c_t n_roots = SolveQuadratic(&coef, &root_1, &root_2);
 
     (void)PrintRoots(n_roots, root_1, root_2);
 

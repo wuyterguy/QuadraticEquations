@@ -1,22 +1,22 @@
-Roots_c_t SolveQuadratic(const Quadratic_coefficients coef,
+Roots_c_t SolveQuadratic(const Quadratic_coefficients* coef,
                        double* const p_root1, double* const p_root2) {
     assert(p_root1 != NULL);
     assert(p_root2 != NULL);
     assert(p_root1 != p_root2);
 
-    if (CmpEpsPrec(coef.a, 0.0)) {
-        return SolveLinear(coef.b, coef.c, p_root1);
+    if (CmpEpsPrec(coef->a, 0.0)) {
+        return SolveLinear(coef->b, coef->c, p_root1);
     }
-    else { /* (coef.a != 0.0) => it's quadric education */
-        double discr = coef.b * coef.b - 4 * coef.a * coef.c;
+    else { /* (coef->a != 0.0) => it's quadric education */
+        double discr = coef->b * coef->b - 4.0 * coef->a * coef->c;
         if (CmpEpsPrec(discr, 0.0)) {
-            *p_root1 = DivideSmart(-coef.b, 2 * coef.a);
+            *p_root1 = DivideSmart(-coef->b, 2.0 * coef->a);
             return ONE_ROOT;
         }
         else if (discr > 0.0) {
             double sq_discr = sqrt(discr);
-            *p_root1 = DivideSmart(-coef.b + sq_discr, 2 * coef.a);
-            *p_root2 = DivideSmart(-coef.b - sq_discr, 2 * coef.a);
+            *p_root1 = DivideSmart(-coef->b + sq_discr, 2.0 * coef->a);
+            *p_root2 = DivideSmart(-coef->b - sq_discr, 2.0 * coef->a);
             return TWO_ROOTS;
         }
         else { /* (discr < 0.0) => there is no solutions */
