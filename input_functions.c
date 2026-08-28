@@ -1,4 +1,6 @@
 get_err_t GetCoefficients(Quadratic_coefficients* coef,Flags command_line_flags) {
+    assert(coef != NULL);
+
     printf("Quadratic equations solver by " Color("Zotov Anton", YEL) "\n");
 
     Input_type_t input_type = CONSOLE_INPUT;
@@ -39,6 +41,7 @@ Input_type_t AskInputType() {
 
 
 Freq_err_t FileRequestCoefficients(Quadratic_coefficients* coef) {
+    assert(coef != NULL);
     assert(&coef->a != NULL);
     assert(&coef->b != NULL);
     assert(&coef->c != NULL);
@@ -120,10 +123,10 @@ char* GetFilename() {
                 return filename;
             }
             if (got_symb == EOF)
-                goto CLEAR_BUF_AND_REPRINT; /* continue with clear and reprint */
+                goto CLEAR_BUF_AND_REPRINT; /* continue with clear and reprint */ // TODO exit by return NULL
         }
 
-        *name_end++ = (char)got_symb;                                                          // read first symbol which is letter
+        *name_end++ = (char)got_symb;                                                    // read first symbol which is letter
         while (isalnum(got_symb = getchar()) || (got_symb == '.') || (got_symb == '_'))  // read symbols until there is space symbol or end of buffer
             *name_end++ = (char)got_symb;
 
@@ -144,6 +147,7 @@ char* GetFilename() {
 
 
 Req_err_t RequestCoefficients(Quadratic_coefficients* coef) {
+    assert(coef != NULL);
     assert(&coef->a != NULL);
     assert(&coef->b != NULL);
     assert(&coef->c != NULL);

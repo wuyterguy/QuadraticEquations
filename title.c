@@ -1,4 +1,5 @@
-#include <stdio.h>   // TODO txlib sfml raylib
+#include "TXLib.h"
+#include <stdio.h>
 #include <stdlib.h>  // TODO clear output
 #include <string.h>
 #include <math.h>
@@ -10,6 +11,33 @@
 #define DEFAULT_FILE "coefficients.txt"
 #define MAX_FILENAME_LENGTH 100
 #define EPSILON 0.00001                                                         // comparison accuracy
+
+#define WINDOW_SIZE_X 800.0
+#define WINDOW_SIZE_Y 800.0
+#define WINDOW_HALF_X (WINDOW_SIZE_X / 2)
+#define WINDOW_HALF_Y (WINDOW_SIZE_X / 2)
+#define WINDOW_QUARTER_X (WINDOW_SIZE_X / 4)
+#define WINDOW_QUARTER_Y (WINDOW_SIZE_X / 4)
+#define SCALE_DIVISION_COUNT_X 10
+#define SCALE_DIVISION_COUNT_Y 8
+#define MAX_NUMBER_SIZE 50
+#define GRID_THICKNESS 1.0           // it's all pixels
+#define CURVE_THICKNESS 3.0
+#define AXIS_THICKNESS 1.0
+#define SHORT_HATCH_THICKNESS 2.0
+#define LONG_HATCH_THICKNESS 3.0
+#define SHORT_HATCH_SIZE 5.0
+#define LONG_HATCH_SIZE 7.0
+#define ROOT_POINT_SIZE 5.0
+#define ORIGIN_POINT_SIZE 5.0
+#define TEXT_SIZE 20.0
+#define SHORT_HATCH_PER_LONG 5.0     // must be natural
+#define OFFSET 8.0
+#define MIN_ORDINATE_DISTANCE 50.0
+#define DELTA_X 1.0                  // pixels
+#define STEPS_COUNT ((int)((WINDOW_SIZE_X / 2 - DEFAULT_ORDINATE_POSITION) / DELTA_X))
+#define DEFAULT_ORDINATE_POSITION 30 // pixels
+#define DEFAULT_SCALE_Y (WINDOW_SIZE_Y / 10.0)
 
 #define MAX_ERROR_COUNT 10
 enum {MAIN_NORMAL, MAIN_FILE_ERROR, MAIN_INPUT_ERROR,
@@ -25,6 +53,8 @@ typedef enum {REQ_NORMAL = 0, REQ_STOP_PROGRAM = MAX_ERROR_COUNT * 2,
 typedef enum {PRINT_NORMAL = 0, PRINT_NROOT_ERROR = MAX_ERROR_COUNT * 3} Print_err_t; // return of PrintRoots()
 typedef enum {GET_NORMAL = 0, GET_INPUT_ERROR = MAX_ERROR_COUNT * 4}       get_err_t; // return of GetCoefficients()
 typedef enum {NO_ROOTS = 0, ONE_ROOT = 1, TWO_ROOTS = 2, INF_ROOTS = -2}   Roots_c_t; // return od Solve___()
+
+typedef double pixel;
 
 
 #define ON  1
@@ -66,12 +96,12 @@ typedef enum {NO_ROOTS = 0, ONE_ROOT = 1, TWO_ROOTS = 2, INF_ROOTS = -2}   Roots
 #define NDEBUG                                                                // switch assert off
 
 #ifndef NDEBUG
-    #define assert(condition)                                                                              \
-    do {                                                                                                   \
-        if(!(condition)) {                                                                                 \
-            fprintf(stderr, "Assertion failed: " #condition ", file %s, line %d", __FILE__, __LINE__);     \
-            abort();                                                                                       \
-        }                                                                                                  \
+    #define assert(condition)                                                                          \
+    do {                                                                                               \
+        if(!(condition)) {                                                                             \
+            fprintf(stderr, "Assertion failed: " #condition ", file %s, line %d", __FILE__, __LINE__); \
+            abort();                                                                                   \
+        }                                                                                              \
     } while (0);
 #else
     #define assert(condition)
@@ -87,6 +117,10 @@ struct Flags {
 struct Expected_sq_result {int n_roots; double root_1; double root_2;};
 struct Conformity_sq_result {bool n_roots, root_1, root_2;};
 struct Quadratic_coefficients {double a; double b; double c;};
+struct Position_parameters {pixel pxl_vertex_x; pixel pxl_vertex_y; pixel scale_x; pixel scale_y;
+                            pixel abscissa_position; pixel ordinate_position;};
+struct Axis_scale {double dgt_step_x; pixel pxl_step_x; double anchor_value_x; pixel anchor_point_x;
+                   double dgt_step_y; pixel pxl_step_y; double anchor_value_y; pixel anchor_point_y;};
 
 
 /**
@@ -99,7 +133,7 @@ struct Quadratic_coefficients {double a; double b; double c;};
  */
 Flags HandleArg(const int argc, const char* argv[]);
 
-
+//____________________UnitTest_for_SolveQuadratic____________________
 /**
  * @brief open file and do tests from it
  *
@@ -147,7 +181,7 @@ void Swap(double* const p_a, double* const p_b);
 void PrintFailed(const Quadratic_coefficients* coef, const int n_roots, const double root_1, const double root_2,
                  const Expected_sq_result exp, const Conformity_sq_result conf, const int test_number);
 
-
+//__________________________input_functions__________________________
 /**
  * @brief get coefficients to addres coef by console or console depending on command_line_flags
  *
@@ -203,7 +237,7 @@ Answer_t AskYesOrNo(void);
  */
 void ClearInputBuf(void);
 
-
+//_______________________calculation_functions_______________________
 /**
  * @brief find the solution of quadratic equation with coefficients coef_a, coef_b, coef_c
  *        and write them to the address proot1, proot2
@@ -255,7 +289,38 @@ bool CmpEpsPrec(const double a, const double b);
  *
  * @return 1 if lf is NAN or 0 if lf isn't
  */
-bool IsNAN(double lf);
+bool IsNAN(const double lf);
+
+int Sign(const double x);  // TODO doc
+
+//__________________________draw_functions___________________________
+void DrawParabola(const Quadratic_coefficients* coef);
+
+void GetParabolaPosition(const Quadratic_coefficients* coef, Position_parameters* parabola);
+
+void DrawGraphic(const Quadratic_coefficients* coef, const Position_parameters* position,
+                 double Derivative(const Quadratic_coefficients*, const pixel, const pixel, const pixel));
+
+void GetAxisScale(const Quadratic_coefficients* coef, const Position_parameters* position,
+                         Axis_scale* axis_sc);
+
+void MakeBlackWindow(void);
+
+void CancelConsolePrinting(void);
+
+void DrawGrid(const Axis_scale* axis_sc);
+
+void DrawAxis(const Axis_scale* axis_sc, const Position_parameters* position);
+
+void DrawCurve(const Quadratic_coefficients* coef, const Position_parameters* position,
+               double Derivative(const Quadratic_coefficients*, const pixel, const pixel, const pixel));
+
+double QuadraticEqualDerivative(const Quadratic_coefficients* coef, const pixel position_x,
+                                 const pixel pxl_vertex_x, const pixel scale_x);
+
+double GetClosest05_1_2(const double x);
+
+double GetPlace(double full, double* p_mantissa);
 
 
 /**
@@ -266,5 +331,7 @@ bool IsNAN(double lf);
  * @param[in] p_roor_2 second root of quadratic equation
  *
  * @return PRINT_NORMAL or exit with error number
+ *
+ * @note IEEE 754
  */
 Print_err_t PrintRoots(Roots_c_t n_roots, const double root_1, const double root_2);

@@ -88,6 +88,8 @@ void PrintErrorMessage(const Ftest_err_t error_type, const int test_number) {
 
 
 int RunTest(const Quadratic_coefficients* coef, const Expected_sq_result exp, const int test_number) {
+    assert(coef != NULL);
+
     double root_1 = NAN, root_2 = NAN;
     Roots_c_t n_roots = SolveQuadratic(coef, &root_1, &root_2);
 
@@ -99,7 +101,7 @@ int RunTest(const Quadratic_coefficients* coef, const Expected_sq_result exp, co
     if (CmpEpsPrec(root_1, exp.root_1))
         conf.root_1 = true;
     else if (!CmpEpsPrec(root_2, exp.root_2)){        // if root_2 == exp.root_2 there is no swap needed
-        Swap(&root_1, &root_2);                       //check second root it,s necessary to correct print FAILED
+        Swap(&root_1, &root_2);                       // check second root it,s necessary to correct print FAILED
         if (CmpEpsPrec(root_1, exp.root_1))
             conf.root_1 = true;
     }
@@ -129,6 +131,8 @@ void Swap(double* const p_a, double* const p_b) {
 
 void PrintFailed(const Quadratic_coefficients* coef, const int n_roots, const double root_1, const double root_2,
                  const Expected_sq_result exp, const Conformity_sq_result conf, const int test_number) {
+    assert(coef != NULL);
+
     printf("Test " Color("%d", MAG) " " Color("FAILED", RED) "\n", test_number);
 
     printf("coefficients: a = " Color("%.5lf", MAG) "; b = " Color("%.5lf", MAG) "; c = " Color("%.5lf", MAG) "\n",

@@ -1,5 +1,6 @@
 Roots_c_t SolveQuadratic(const Quadratic_coefficients* coef,
                        double* const p_root1, double* const p_root2) {
+    assert(coef != NULL);
     assert(p_root1 != NULL);
     assert(p_root2 != NULL);
     assert(p_root1 != p_root2);
@@ -61,11 +62,11 @@ bool CmpEpsPrec(const double a, const double b) {
 }
 
 
-bool IsNAN(double lf) {
+bool IsNAN(const double lf) {
     bool result = false;
-    unsigned char* pointer_to_start = (unsigned char*)&lf + sizeof(double);
+    const unsigned char* pointer_to_start = (const unsigned char*)&lf + sizeof(double);
 
-    for (unsigned char* pointer_to_byte = pointer_to_start - 3;
+    for (const unsigned char* pointer_to_byte = pointer_to_start - 3;
          pointer_to_byte >= pointer_to_start - 8; pointer_to_byte--) {
         if (*pointer_to_byte != 0b00000000){                              // 13rd - 64th bits must contain
             result = true;                                                // at least one bit with 1 value
@@ -73,12 +74,20 @@ bool IsNAN(double lf) {
         }
     }
 
-    if ((unsigned char)(*(pointer_to_start - 2) << 4) != 0)               // 13rd - 64th bits must contain
-        result = true;                                                    // at least one bit with 1 value
+    if ((const unsigned char)(*(pointer_to_start - 2) << 4) != 0)               // 13rd - 64th bits must contain
+        result = true;                                                          // at least one bit with 1 value
 
-    if (((unsigned char)(*(pointer_to_start - 1) << 1) != 0b11111110) ||  // 1st byte must be ?1111111
-        ((unsigned char)(*(pointer_to_start - 2) >> 4) != 0b00001111))    // 2nd byte must be 1111????
+    if (((const unsigned char)(*(pointer_to_start - 1) << 1) != 0b11111110) ||  // 1st byte must be ?1111111
+        ((const unsigned char)(*(pointer_to_start - 2) >> 4) != 0b00001111))    // 2nd byte must be 1111????
         result = false;
 
     return result;
+}
+
+
+int Sign(const double x) {
+    if (x >= 0.0)
+        return 1;
+    else
+        return -1;
 }

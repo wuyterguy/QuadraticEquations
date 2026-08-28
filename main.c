@@ -2,6 +2,7 @@
 #include "UnitTest_for_SolveQuadratic.c"
 #include "input_functions.c"
 #include "calculation_functions.c"
+#include "draw_functions.c"
 
 int main(const int argc, const char* argv[]) {
     Flags command_line_flags = HandleArg(argc, argv);
@@ -16,6 +17,10 @@ int main(const int argc, const char* argv[]) {
     Roots_c_t n_roots = SolveQuadratic(&coef, &root_1, &root_2);
 
     (void)PrintRoots(n_roots, root_1, root_2);
+
+    printf("Press " Color("Enter", MAG) " to see graphic\n");
+    getchar();
+    DrawParabola(&coef);
 
     return MAIN_NORMAL;
 }
