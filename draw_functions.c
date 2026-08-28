@@ -1,24 +1,17 @@
 // in task you need to use point_
-#define DoAcrossEntireScreenRange(lo_coord, up_coord, type_start, start, step,         \
-                                  preliminary_task, intermediate_task, task)           \
-preliminary_task                                                                       \
+#define DoAcrossEntireScreenRange(lo_coord, up_coord, type_start, start, step, task)   \
 for (type_start point_##lo_coord = start##lo_coord;                                    \
      point_##lo_coord <= WINDOW_SIZE_##up_coord; point_##lo_coord += step##lo_coord) { \
     task                                                                               \
 }                                                                                      \
-intermediate_task                                                                      \
 for (type_start point_##lo_coord = start##lo_coord;                                    \
      point_##lo_coord >= 0.0; point_##lo_coord -= step##lo_coord) {                    \
     task                                                                               \
 }
 
-#define DoXYAcrossEntireScreenRange(type_start, start, step,                         \
-                                    preliminary_task_x, intermediate_task_x, task_x, \
-                                    preliminary_task_y, intermediate_task_y, task_y) \
-    DoAcrossEntireScreenRange(x, X, type_start, start, step,                         \
-                              preliminary_task_x, intermediate_task_x, task_x)       \
-    DoAcrossEntireScreenRange(y, Y, type_start, start, step,                         \
-                              preliminary_task_y, intermediate_task_y, task_y)
+#define DoXYAcrossEntireScreenRange(type_start, start, step, task_x, task_y) \
+    DoAcrossEntireScreenRange(x, X, type_start, start, step, task_x)         \
+    DoAcrossEntireScreenRange(y, Y, type_start, start, step, task_y)
 
 
 void DrawParabola(const Quadratic_coefficients* coef) {
@@ -138,18 +131,39 @@ void DrawGrid(const Axis_scale* axis_sc) {
     double small_square_step_y = axis_sc->pxl_step_y / SHORT_HATCH_PER_LONG;
 
     txSetColor(RGB(50, 40, 55), GRID_THICKNESS);                                     // small square
-    DoXYAcrossEntireScreenRange(pixel, axis_sc->anchor_point_, small_square_step_, , ,
-        txLine(point_x, 0.0, point_x, WINDOW_SIZE_Y);, , ,
+    DoXYAcrossEntireScreenRange(pixel, axis_sc->anchor_point_, small_square_step_,
+        txLine(point_x, 0.0, point_x, WINDOW_SIZE_Y);,
         txLine(0.0, point_y, WINDOW_SIZE_X, point_y);
     );
 
     txSetColor(RGB(65, 55, 70), GRID_THICKNESS);                                     // big square
-    DoXYAcrossEntireScreenRange(pixel, axis_sc->anchor_point_, axis_sc->pxl_step_, , ,
-        txLine(point_x, 0.0, point_x, WINDOW_SIZE_Y);, , ,
+    DoXYAcrossEntireScreenRange(pixel, axis_sc->anchor_point_, axis_sc->pxl_step_,
+        txLine(point_x, 0.0, point_x, WINDOW_SIZE_Y);,
         txLine(0.0, point_y, WINDOW_SIZE_X, point_y);
     );
 }
 
+
+#define DrawAbscissaHatches(condition, sign_1, sign_2)                                                                                       \
+    value_x = axis_sc->anchor_value_x;                                                                                                       \
+    for (pixel point_x = axis_sc->anchor_point_x; condition; point_x sign_1##= axis_sc->pxl_step_x, value_x sign_2##= axis_sc->dgt_step_x) { \
+        if (!(CmpEpsPrec(value_x, 0.0))) {                                                                                                   \
+            txLine(point_x, position->abscissa_position - LONG_HATCH_SIZE, point_x, position->abscissa_position + LONG_HATCH_SIZE);          \
+            sprintf(value_str, "%lg", value_x);                                                                                              \
+            txTextOut(point_x, position->abscissa_position - OFFSET, value_str);                                                             \
+        }                                                                                                                                    \
+        else if (point_x >= DEFAULT_ORDINATE_POSITION - EPSILON &&                                                                           \
+                 point_x <= WINDOW_SIZE_X - DEFAULT_ORDINATE_POSITION + EPSILON)                                                             \
+            txCircle(point_x, position->abscissa_position, ORIGIN_POINT_SIZE);                                                               \
+    }
+
+#define DrawOrdinateHatches(condition, sign_1, sign_2)                                                                                       \
+    value_y = axis_sc->anchor_value_y;                                                                                                       \
+    for (pixel point_y = axis_sc->anchor_point_y; condition; point_y sign_1##= axis_sc->pxl_step_y, value_y sign_2##= axis_sc->dgt_step_y) { \
+        txLine(position->ordinate_position - LONG_HATCH_SIZE, point_y, position->ordinate_position + LONG_HATCH_SIZE, point_y);              \
+        sprintf(value_str, "%lg", value_y);                                                                                                  \
+        txTextOut(position->ordinate_position + OFFSET * offsetDirection, point_y + TEXT_SIZE / 2, value_str);                               \
+    }
 
 void DrawAxis(const Axis_scale* axis_sc, const Position_parameters* position) {
     assert(axis_sc != NULL);
@@ -165,50 +179,30 @@ void DrawAxis(const Axis_scale* axis_sc, const Position_parameters* position) {
     double small_square_step_y = axis_sc->pxl_step_y / SHORT_HATCH_PER_LONG;
 
     txSetColor(TX_MAGENTA, SHORT_HATCH_THICKNESS);                                   // short hatches
-    DoXYAcrossEntireScreenRange(pixel, axis_sc->anchor_point_, small_square_step_, , ,
-        txLine(point_x, position->abscissa_position - SHORT_HATCH_SIZE, point_x, position->abscissa_position + SHORT_HATCH_SIZE);, , ,
+    DoXYAcrossEntireScreenRange(pixel, axis_sc->anchor_point_, small_square_step_,
+        txLine(point_x, position->abscissa_position - SHORT_HATCH_SIZE, point_x, position->abscissa_position + SHORT_HATCH_SIZE);,
         txLine(position->ordinate_position - SHORT_HATCH_SIZE, point_y, position->ordinate_position + SHORT_HATCH_SIZE, point_y);
     );
 
     txSetFillColor(TX_MAGENTA);                                                      // long hatches and values
     txSetColor(TX_MAGENTA, LONG_HATCH_THICKNESS);
+    txSetTextAlign(TA_CENTER|TA_BOTTOM);
     txSelectFont("Arial", TEXT_SIZE);
 
-    DoXYAcrossEntireScreenRange(pixel, axis_sc->anchor_point_, axis_sc->pxl_step_,
-        txSetTextAlign(TA_CENTER|TA_BOTTOM);
-        double value_x = axis_sc->anchor_value_x;
-        int bypass = 1;,
+    double value_x = 0;
+    DrawAbscissaHatches(point_x <= WINDOW_SIZE_X, +, +);
+    DrawAbscissaHatches(point_x >= 0.0, -, -);
 
-        value_x = axis_sc->anchor_value_x;
-        bypass = -1;,
+    txSetTextAlign(TA_LEFT|TA_BOTTOM);                                               // ordinate hatches
+    double offsetDirection = 1.0;
+    if (position->ordinate_position >= WINDOW_SIZE_X - MIN_ORDINATE_DISTANCE) {
+        txSetTextAlign(TA_RIGHT|TA_BOTTOM);
+        offsetDirection = -1.0;
+    }
+    double value_y = 0;
 
-        if (!(CmpEpsPrec(value_x, 0.0))) {
-            txLine(point_x, position->abscissa_position - LONG_HATCH_SIZE, point_x, position->abscissa_position + LONG_HATCH_SIZE);
-            sprintf(value_str, "%lg", value_x);
-            txTextOut(point_x, position->abscissa_position - OFFSET, value_str);
-        }
-        else if (point_x >= DEFAULT_ORDINATE_POSITION - EPSILON &&
-                 point_x <= WINDOW_SIZE_X - DEFAULT_ORDINATE_POSITION + EPSILON)
-            txCircle(point_x, position->abscissa_position, ORIGIN_POINT_SIZE);
-        value_x += (axis_sc->dgt_step_x * bypass);,
-
-        txSetTextAlign(TA_LEFT|TA_BOTTOM);
-        double offsetDirection = 1.0;
-        if (position->ordinate_position >= WINDOW_SIZE_X - MIN_ORDINATE_DISTANCE) {
-            txSetTextAlign(TA_RIGHT|TA_BOTTOM);
-            offsetDirection = -1.0;
-        }
-        double value_y = axis_sc->anchor_value_y;
-        bypass = 1;,
-
-        value_y = axis_sc->anchor_value_y;
-        bypass = -1;,
-
-        txLine(position->ordinate_position - LONG_HATCH_SIZE, point_y, position->ordinate_position + LONG_HATCH_SIZE, point_y);
-        sprintf(value_str, "%lg", value_y);
-        txTextOut(position->ordinate_position + OFFSET * offsetDirection, point_y + TEXT_SIZE / 2, value_str);
-        value_y -= (axis_sc->dgt_step_y * bypass);
-    );
+    DrawOrdinateHatches(point_y >= 0.0, -, +);
+    DrawOrdinateHatches(point_y <= WINDOW_SIZE_Y, +, -);
 }
 
 
