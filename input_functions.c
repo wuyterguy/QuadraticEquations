@@ -41,11 +41,11 @@ Input_type_t AskInputType() {
 
 
 Freq_err_t FileRequestCoefficients(Quadratic_coefficients* coef) {
-    assert(coef != NULL);
-    assert(&coef->a != NULL);
+    assert(coef != NULL); // TODO arguments of flags
+    assert(&coef->a != NULL); // TODO pass test file
     assert(&coef->b != NULL);
     assert(&coef->c != NULL);
-    assert(&coef->a != &coef->b && &coef->a != &coef->c && &coef->b != &coef->c);
+    assert(&coef->a != &coef->b && &coef->a != &coef->c && &coef->b != &coef->c); // TODO collect warnings
 
     Freq_err_t error_type = FREQ_NORMAL;
 
@@ -54,6 +54,11 @@ Freq_err_t FileRequestCoefficients(Quadratic_coefficients* coef) {
                " (press " Color("Enter", MAG) " to use default file)" "\n");
 
         char* filename = GetFilename();
+        if (filename == NULL) {
+            printf("End of input file\n");
+            exit(FREQ_INPUT_ERROR);
+        }
+
         FILE* coefficients_file = fopen(filename, "r");
 
         error_type = FREQ_NORMAL;
@@ -123,7 +128,7 @@ char* GetFilename() {
                 return filename;
             }
             if (got_symb == EOF)
-                goto CLEAR_BUF_AND_REPRINT; /* continue with clear and reprint */ // TODO exit by return NULL
+                return NULL;
         }
 
         *name_end++ = (char)got_symb;                                                    // read first symbol which is letter
@@ -137,8 +142,6 @@ char* GetFilename() {
             *name_end++ = '\0';
             return filename;
         }
-
-        CLEAR_BUF_AND_REPRINT: /* from goto */
 
         ClearInputBuf();
         printf("Enter a filename like: " Color(DEFAULT_FILE, YEL) "\n");
