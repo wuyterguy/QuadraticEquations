@@ -18,10 +18,14 @@ void DrawParabola(const Quadratic_coefficients* coef) {
     assert(coef != NULL);
     assert(!CmpEpsPrec(coef->a, 0.0));
 
-    Position_parameters parabola = {};
-    GetParabolaPosition(coef, &parabola);
+    if (!CmpEpsPrec(coef->a, 0.0)) {
+        Position_parameters parabola = {};
+        GetParabolaPosition(coef, &parabola);
 
-    DrawGraphic(coef, &parabola, QuadraticEqualDerivative);
+        DrawGraphic(coef, &parabola, QuadraticEqualDerivative);
+    }
+    else
+        DrawLinear(coef->b, coef->c);
 }
 
 
@@ -30,9 +34,9 @@ void GetParabolaPosition(const Quadratic_coefficients* coef, Position_parameters
     assert(parabola != NULL);
 
     double discr = coef->b * coef->b - 4.0 * coef->a * coef->c;
-    double y_vertex_value = coef->c - coef->b * coef->b / 4.0 / coef->a;
-    double x_vertex_value = -coef->b / 2.0 / coef->a;
 
+    parabola->y_vertex_value = coef->c - coef->b * coef->b / 4.0 / coef->a;
+    parabola->x_vertex_value = -coef->b / 2.0 / coef->a;
     parabola->pxl_vertex_x = WINDOW_HALF_X;
 
     if (CmpEpsPrec(discr, 0.0)) {
@@ -44,32 +48,58 @@ void GetParabolaPosition(const Quadratic_coefficients* coef, Position_parameters
     else if (discr > 0.0) {
         parabola->abscissa_position = WINDOW_HALF_Y;                                     // middle
         parabola->scale_x = WINDOW_HALF_X / (sqrt(discr) / fabs(coef->a));               // roots difference
-        parabola->scale_y = WINDOW_QUARTER_Y / fabs(y_vertex_value);                     // height of pxl_vertex
-        parabola->pxl_vertex_y = parabola->abscissa_position - y_vertex_value * parabola->scale_y;
+        parabola->scale_y = WINDOW_QUARTER_Y / fabs(parabola->y_vertex_value);                     // height of pxl_vertex
+        parabola->pxl_vertex_y = parabola->abscissa_position - parabola->y_vertex_value * parabola->scale_y;
     }
     else { /* (discr < 0) */
         parabola->abscissa_position = fmod(WINDOW_SIZE_Y - Sign(coef->a) * WINDOW_QUARTER_Y, WINDOW_SIZE_Y);
-        parabola->scale_y = WINDOW_QUARTER_Y / fabs(y_vertex_value);                     // height of pxl_vertex
+        parabola->scale_y = WINDOW_QUARTER_Y / fabs(parabola->y_vertex_value);                     // height of pxl_vertex
         parabola->scale_x = sqrt(parabola->scale_y * fabs(coef->a) * WINDOW_QUARTER_Y);  // beauty
-        parabola->pxl_vertex_y = parabola->abscissa_position - y_vertex_value * parabola->scale_y;
+        parabola->pxl_vertex_y = parabola->abscissa_position - parabola->y_vertex_value * parabola->scale_y;
     }
 
-    if ((WINDOW_HALF_X - DEFAULT_ORDINATE_POSITION) / parabola->scale_x > fabs(x_vertex_value))
-        parabola->ordinate_position = WINDOW_HALF_X - x_vertex_value * parabola->scale_x;
+    if ((WINDOW_HALF_X - DEFAULT_ORDINATE_POSITION) / parabola->scale_x > fabs(parabola->x_vertex_value))
+        parabola->ordinate_position = WINDOW_HALF_X - parabola->x_vertex_value * parabola->scale_x;
     else /* ordinate isn't into screen */
-        parabola->ordinate_position = fmod(WINDOW_SIZE_X + Sign(x_vertex_value) * DEFAULT_ORDINATE_POSITION,
-                                 WINDOW_SIZE_X);
+        parabola->ordinate_position = fmod(WINDOW_SIZE_X + Sign(parabola->x_vertex_value) * DEFAULT_ORDINATE_POSITION, WINDOW_SIZE_X);
+}
+
+
+void DrawLinear(double coef_a, double coef_b) {
+    Position_parameters linear = {};
+    GetLinearPosition(coef_a, coef_b, &linear);
+
+    Quadratic_coefficients coef = {coef_a, coef_b, NAN};
+    DrawGraphic(&coef, &linear, LinearEqualDerivative);
+}
+
+
+void GetLinearPosition(double coef_a, double coef_b, Position_parameters* linear) {
+    linear->pxl_vertex_x = WINDOW_HALF_X;
+    linear->pxl_vertex_y = WINDOW_HALF_Y - Sign(coef_b) * WINDOW_QUARTER_Y;
+    linear->y_vertex_value = coef_b;
+    linear->x_vertex_value = 0.0;
+    linear->abscissa_position = WINDOW_HALF_Y;
+    linear->ordinate_position = WINDOW_HALF_X;
+    if (!CmpEpsPrec(coef_b, 0.0))
+        linear->scale_y = WINDOW_QUARTER_Y / fabs(coef_b);
+    else
+        linear->scale_y = DEFAULT_SCALE_Y;
+    if (!CmpEpsPrec(coef_a, 0.0))
+        linear->scale_x = WINDOW_QUARTER_X / fabs(coef_b / coef_a);
+    else
+        linear->scale_x = DEFAULT_SCALE_X;
 }
 
 
 void DrawGraphic(const Quadratic_coefficients* coef, const Position_parameters* position,
-                 double Derivative(const Quadratic_coefficients*, const pixel, const pixel, const pixel)) {
+                 double Derivative(const Derivative_parameters*)) {
     assert(coef != NULL);
     assert(position != NULL);
     assert(Derivative);
 
     Axis_scale axes_sc = {};
-    GetAxisScale(coef, position, &axes_sc);
+    GetAxisScale(position, &axes_sc);
 
     MakeBlackWindow();
 
@@ -83,13 +113,10 @@ void DrawGraphic(const Quadratic_coefficients* coef, const Position_parameters* 
 }
 
 
-void GetAxisScale(const Quadratic_coefficients* coef, const Position_parameters* position,
-                  Axis_scale* axes_sc) {
-    assert(coef != NULL);
+void GetAxisScale(const Position_parameters* position, Axis_scale* axes_sc) {
     assert(position != NULL);
     assert(axes_sc != NULL);
 
-    double x_vertex_value = -coef->b / 2.0 / coef->a; // TODO get x_vertex value in get position
     double sc_div_x = WINDOW_SIZE_X / SCALE_DIVISION_COUNT_X / position->scale_x;
     double sc_div_y = WINDOW_SIZE_Y / SCALE_DIVISION_COUNT_Y / position->scale_y;
     double processed_sc_div_x = 1.0;
@@ -99,8 +126,8 @@ void GetAxisScale(const Quadratic_coefficients* coef, const Position_parameters*
 
     axes_sc->dgt_step_x = processed_sc_div_x * pow(10.0, decimal_place_x);
     axes_sc->pxl_step_x = axes_sc->dgt_step_x * position->scale_x;
-    axes_sc->anchor_value_x = floor(x_vertex_value / axes_sc->dgt_step_x) * axes_sc->dgt_step_x;
-    axes_sc->anchor_point_x = position->pxl_vertex_x - (x_vertex_value - axes_sc->anchor_value_x) * position->scale_x;
+    axes_sc->anchor_value_x = floor(position->x_vertex_value / axes_sc->dgt_step_x) * axes_sc->dgt_step_x;
+    axes_sc->anchor_point_x = position->pxl_vertex_x - (position->x_vertex_value - axes_sc->anchor_value_x) * position->scale_x;
 
     axes_sc->dgt_step_y = processed_sc_div_y * pow(10.0, decimal_place_y);
     axes_sc->pxl_step_y = axes_sc->dgt_step_y * position->scale_y;
@@ -206,26 +233,26 @@ void DrawAxis(const Axis_scale* axes_sc, const Position_parameters* position) {
 }
 
 
-#define DrawBranch(sign_x, sign_y)                                                                                                \
-x = position->pxl_vertex_x;                                                                                                       \
-y = position->pxl_vertex_y;                                                                                                       \
-for(int step_number = 0; step_number < STEPS_COUNT && y < WINDOW_SIZE_Y && y > 0.0; step_number++) {                              \
-    delta_y = DELTA_X * (position->scale_y / position->scale_x) * Derivative(coef, x, position->pxl_vertex_x, position->scale_x); \
-    txLine(x, y, x sign_x DELTA_X, y sign_y delta_y);                                                                             \
-                                                                                                                                  \
-    x sign_x##= DELTA_X;                                                                                                        \
-    y sign_y##= delta_y;                                                                                                        \
+#define DrawBranch(sign_x, sign_y)                                                                   \
+x = position->pxl_vertex_x;                                                                          \
+y = position->pxl_vertex_y;                                                                          \
+for(int step_number = 0; step_number < STEPS_COUNT && y < WINDOW_SIZE_Y && y > 0.0; step_number++) { \
+    const Derivative_parameters der_par = {coef, x, position->pxl_vertex_x, position->scale_x};               \
+    delta_y = DELTA_X * (position->scale_y / position->scale_x) * Derivative(&der_par);              \
+    txLine(x, y, x sign_x DELTA_X, y sign_y delta_y);                                                \
+                                                                                                     \
+    x sign_x##= DELTA_X;                                                                             \
+    y sign_y##= delta_y;                                                                             \
 }
 
 void DrawCurve(const Quadratic_coefficients* coef, const Position_parameters* position,
-               double Derivative(const Quadratic_coefficients*, const pixel, const pixel, const pixel)) {
+               double Derivative(const Derivative_parameters*)) {
     assert(coef != NULL);
     assert(position != NULL);
     assert(Derivative);
 
     txSetFillColor(TX_RED);
     txSetColor(TX_RED, CURVE_THICKNESS);
-    double discr = coef->b * coef->b - 4.0 * coef->a * coef->c;
     pixel delta_y = 0.0;
 
     pixel x = 0.0, y = 0.0;
@@ -233,41 +260,55 @@ void DrawCurve(const Quadratic_coefficients* coef, const Position_parameters* po
     DrawBranch(+, -);               // right_branch
     DrawBranch(-, +);               // left_branch
 
-    if (CmpEpsPrec(discr, 0.0))     // roots
-        txCircle(position->abscissa_position, position->pxl_vertex_y, ROOT_POINT_SIZE);
-    else if (discr > 0.0) {
-        double ver_root_distance = sqrt(discr) / 2 / coef->a;
-        txCircle(position->pxl_vertex_x + ver_root_distance * position->scale_x, position->abscissa_position, ROOT_POINT_SIZE);
-        txCircle(position->pxl_vertex_x - ver_root_distance * position->scale_x, position->abscissa_position, ROOT_POINT_SIZE);
+    if (!IsNAN(coef->c)) {
+        double discr = coef->b * coef->b - 4.0 * coef->a * coef->c;
+        if (CmpEpsPrec(discr, 0.0))     // roots
+            txCircle(position->abscissa_position, position->pxl_vertex_y, ROOT_POINT_SIZE);
+        else if (discr > 0.0) {
+            double ver_root_distance = sqrt(discr) / 2 / coef->a;
+            txCircle(position->pxl_vertex_x + ver_root_distance * position->scale_x, position->abscissa_position, ROOT_POINT_SIZE);
+            txCircle(position->pxl_vertex_x - ver_root_distance * position->scale_x, position->abscissa_position, ROOT_POINT_SIZE);
+        }
     }
+    else if (!CmpEpsPrec(coef->a, 0.0))
+        txCircle(position->ordinate_position + (-coef->b / coef->a) * position->scale_x,
+                 position->abscissa_position, ROOT_POINT_SIZE);
 }
 
 
-double QuadraticEqualDerivative (const Quadratic_coefficients* coef, const pixel position_x,
-                                 const pixel pxl_vertex_x, const pixel scale_x) {
-    assert(coef != NULL);
+double QuadraticEqualDerivative (const Derivative_parameters* der_par) {
+    assert(der_par != NULL);
+    assert(der_par->coef != NULL);
 
-    double real_x = (position_x - pxl_vertex_x) / scale_x;
+    double real_x = (der_par->current_x - der_par->pxl_vertex_x) / der_par->scale_x;
 
-    return 2.0 * coef->a * real_x;
+    return 2.0 * der_par->coef->a * real_x;
 }
 
 
-double Place(double full, double* p_mantissa) {
+double LinearEqualDerivative (const Derivative_parameters* der_par) {
+    assert(der_par != NULL);
+    assert(der_par->coef != NULL);
+
+    return der_par->coef->a;
+}
+
+
+int Place(double full, double* p_mantissa) {
     assert(p_mantissa != NULL);
 
-    double place = 0.0;
+    int place = 0;
 
     if (full < 0.32) {
         while (full < 0.32) {
             full *= 10.0;
-            place -= 1.0;
+            place--;
         }
     }
     else if (full > 3.2) {
         while (full > 3.2) {
             full /= 10.0;
-            place += 1.0;
+            place++;
         }
     }
 

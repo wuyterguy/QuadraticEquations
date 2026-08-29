@@ -86,8 +86,10 @@ bool IsNAN(const double lf) {
 
 
 int Sign(const double x) {
-    if (x >= 0.0)
+    if (CmpEpsPrec(x, 0.0))
+        return 0;
+    else if (x > 0)
         return 1;
-    else
+    else /* (x < 0) */
         return -1;
 }

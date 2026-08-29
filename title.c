@@ -5,9 +5,9 @@
 #include <math.h>    // TODO collect warnings
 #include <ctype.h>   /// TODO linear graphic
 
-#define HELPFILE "help.txt"
-#define OUTPUT_SLOW_DELAY 25.0
-#define OUTPUT_FAST_DELAY 15.0
+#define HELPFILE "help.txt"    /// TODO if click enter or other key it will be skiped for current print
+#define OUTPUT_SLOW_DELAY 25.0       // milliseconds
+#define OUTPUT_FAST_DELAY 15.0       // milliseconds
 #define MAX_OUTOUT_LENGTH 200
 #define MAX_TEST_LINE_LENGTH 200
 #define HUNDRED_PERCENT 100
@@ -16,12 +16,12 @@
 #define MAX_FILENAME_LENGTH 100
 #define EPSILON 0.00001                                                         // comparison accuracy
 
-#define WINDOW_SIZE_X 800.0
+#define WINDOW_SIZE_X 1000.0
 #define WINDOW_SIZE_Y 800.0
 #define WINDOW_HALF_X (WINDOW_SIZE_X / 2)
-#define WINDOW_HALF_Y (WINDOW_SIZE_X / 2)
+#define WINDOW_HALF_Y (WINDOW_SIZE_Y / 2)
 #define WINDOW_QUARTER_X (WINDOW_SIZE_X / 4)
-#define WINDOW_QUARTER_Y (WINDOW_SIZE_X / 4)
+#define WINDOW_QUARTER_Y (WINDOW_SIZE_Y / 4)
 #define SCALE_DIVISION_COUNT_X 10
 #define SCALE_DIVISION_COUNT_Y 8
 #define MAX_NUMBER_LENGTH 50
@@ -39,8 +39,9 @@
 #define OFFSET 8.0
 #define MIN_ORDINATE_DISTANCE 50.0
 #define DELTA_X 1.0                  // pixels
-#define STEPS_COUNT ((int)((WINDOW_SIZE_X / 2 - DEFAULT_ORDINATE_POSITION) / DELTA_X))
+#define STEPS_COUNT (int)(WINDOW_HALF_X / DELTA_X)//((int)((WINDOW_HALF_X - DEFAULT_ORDINATE_POSITION) / DELTA_X))
 #define DEFAULT_ORDINATE_POSITION 30 // pixels
+#define DEFAULT_SCALE_X (WINDOW_SIZE_Y / 10.0)
 #define DEFAULT_SCALE_Y (WINDOW_SIZE_Y / 10.0)
 
 #define MAX_ERROR_COUNT 10
@@ -122,10 +123,13 @@ struct Flags {
 struct Expected_sq_result {int n_roots; double root_1; double root_2;};
 struct Conformity_sq_result {bool n_roots, root_1, root_2;};
 struct Quadratic_coefficients {double a; double b; double c;};
-struct Position_parameters {pixel pxl_vertex_x; pixel pxl_vertex_y; pixel scale_x; pixel scale_y;
+struct Position_parameters {pixel pxl_vertex_x; pixel pxl_vertex_y;
+                            double x_vertex_value; double y_vertex_value; pixel scale_x; pixel scale_y;
                             pixel abscissa_position; pixel ordinate_position;};
 struct Axis_scale {double dgt_step_x; pixel pxl_step_x; double anchor_value_x; pixel anchor_point_x;
                    double dgt_step_y; pixel pxl_step_y; double anchor_value_y; pixel anchor_point_y;};
+struct Derivative_parameters {const Quadratic_coefficients* coef; pixel current_x;
+                              pixel pxl_vertex_x; pixel scale_x;};
 
 
 //__________________________main_functions___________________________
@@ -346,13 +350,13 @@ bool IsNAN(const double lf);
  *
  * @param[in] x number under investigation
  *
- * @return 1 or -1 depending on sign of x
+ * @return 1 0 or -1 depending on sign of x
  */
 int Sign(const double x);
 
 //__________________________draw_functions___________________________
 /**
- * @brief draw beautiful graphic of parabola with coordinate system
+ * @brief draw beautiful graphic of parabola or linear with coordinate system
  *
  * @param[in] coef pointer to structure containing coefficients of quadratic equation
  */
@@ -362,9 +366,26 @@ void DrawParabola(const Quadratic_coefficients* coef);
  * @brief get information about position and scale of graphic
  *
  * @param[in]  coef     pointer to structure containing coefficients of quadratic equation
- * @param[out] position pointer to structure containing information about position and scale of graphic
+ * @param[out] parabola pointer to structure containing information about position and scale of graphic
  */
 void GetParabolaPosition(const Quadratic_coefficients* coef, Position_parameters* parabola);
+
+/**
+ * @brief draw beautiful graphic of linear with coordinate system
+ *
+ * @param[in]  coef_a coefficient a of linear equal
+ * @param[in]  coef_b coefficient b of linear equal
+ */
+void DrawLinear(double coef_a, double coef_b);
+
+/**
+ * @brief get information about position and scale of graphic
+ *
+ * @param[in]  coef_a coefficient a of linear equal
+ * @param[in]  coef_b coefficient b of linear equal
+ * @param[out] linear pointer to structure containing information about position and scale of graphic
+ */
+void GetLinearPosition(double coef_a, double coef_b, Position_parameters* linear);
 
 /**
  * @brief draw beautiful graphic of some function with coordinate system
@@ -374,17 +395,15 @@ void GetParabolaPosition(const Quadratic_coefficients* coef, Position_parameters
  * @param[in] Derivative function calculating derivative of function for DrawGraphic()
  */
 void DrawGraphic(const Quadratic_coefficients* coef, const Position_parameters* position,
-                 double Derivative(const Quadratic_coefficients*, const pixel, const pixel, const pixel));
+                 double Derivative(const Derivative_parameters*));
 
 /**
  * @brief get information about digitalization of axes
  *
- * @param[in]  coef     pointer to structure containing coefficients of quadratic equation
  * @param[in]  position pointer to structure containing information about position and scale of graphic
  * @param[out] axes_sc  pointer to structure containing information about digitalization of axes
  */
-void GetAxisScale(const Quadratic_coefficients* coef, const Position_parameters* position,
-                         Axis_scale* axes_sc);
+void GetAxisScale(const Position_parameters* position, Axis_scale* axes_sc);
 
 /**
  * @brief make black window
@@ -419,20 +438,25 @@ void DrawAxis(const Axis_scale* axes_sc, const Position_parameters* position);
  * @param[in] Derivative function calculating derivative of function for DrawGraphic()
  */
 void DrawCurve(const Quadratic_coefficients* coef, const Position_parameters* position,
-               double Derivative(const Quadratic_coefficients*, const pixel, const pixel, const pixel));
+               double Derivative(const Derivative_parameters*));
 
 /**
  * @brief get derivative of quadratic equal for current position_x
  *
- * @param[in] coef         pointer to structure containing coefficients of quadratic equation
- * @param[in] position_x   current x in pixels
- * @param[in] pxl_vertex_x x-axis position of parabola vertex in pixels
- * @param[in] scale_x      x-axis scale
+ * @param[in] der_par pointer to structure containing parameters for derivative
  *
  * @return derivative of quadratic equal
  */
-double QuadraticEqualDerivative(const Quadratic_coefficients* coef, const pixel position_x,
-                                 const pixel pxl_vertex_x, const pixel scale_x);
+double QuadraticEqualDerivative(const Derivative_parameters* der_par);
+
+/**
+ * @brief get derivative of linear equal for current position_x
+ *
+ * @param[in] der_par pointer to structure containing parameters for derivative
+ *
+ * @return derivative of linear equal
+ */
+double LinearEqualDerivative (const Derivative_parameters* der_par);
 
 /**
  * @brief find closest number among 0.5 1 2 for number 0.32 - 3.2
@@ -451,4 +475,4 @@ double Closest05_1_2(const double x);
  *
  * @return decimal place of full
  */
-double Place(double full, double* p_mantissa);
+int Place(double full, double* p_mantissa);

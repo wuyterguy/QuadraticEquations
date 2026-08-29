@@ -46,12 +46,12 @@ void HandleArg(const int argc, const char* argv[], Flags* command_line_flags) {
 
         while (isalpha(*arg_position)) {
             switch (*arg_position) {
-                case 'f': command_line_flags->file_input_flag = 1; break;
-                case 'c': command_line_flags->console_input_flag = 1; break;
+                case 'f': command_line_flags->file_input_flag = 1;          break;
+                case 'c': command_line_flags->console_input_flag = 1;       break;
                 case 't': command_line_flags->preliminary_testing_flag = 1; break;
-                case 'h': command_line_flags->show_helplist_flag = 1; break;
-                case 'g': command_line_flags->draw_graphic_flag = 1; break;
-                case 'a': command_line_flags->animated_output_flag = 1; break;
+                case 'h': command_line_flags->show_helplist_flag = 1;       break;
+                case 'g': command_line_flags->draw_graphic_flag = 1;        break;
+                case 'a': command_line_flags->animated_output_flag = 1;     break;
                 default: break;
             }
 
@@ -75,11 +75,14 @@ Help_err_t ShowHelplist(const Flags* command_line_flags) {
     int current_symbol = 0;
     while (((current_symbol = getc(help_file)) != '\0') && (current_symbol != EOF)) {
         putchar(current_symbol);
-        if (command_line_flags->animated_output_flag)
-            txSleep(OUTPUT_SLOW_DELAY);
+        if (command_line_flags->animated_output_flag) {
+            txSleep(OUTPUT_FAST_DELAY);
+        }
     }
 
     if (ferror(help_file)){
+        sprintf(output_str, "File " Color(HELPFILE, YEL) " - error during the reading\n");
+        PrintAnimated(output_str, command_line_flags);
         fclose(help_file);
         exit(HELP_READ_ERROR);
     }
@@ -126,7 +129,7 @@ Print_err_t PrintRoots(Roots_c_t n_roots, const double root_1, const double root
 
 
 void PrintAnimated(const char* output_str, const Flags* command_line_flags) {
-    const char* current_symbol = output_str; /// TODO if click enter or other key it will be skiped for current print
+    const char* current_symbol = output_str;
     while ((*current_symbol != '\0') && (*current_symbol != EOF)) {
         if (*current_symbol == '\x1b') {
             do {
