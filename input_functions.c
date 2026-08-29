@@ -1,21 +1,25 @@
-get_err_t GetCoefficients(Quadratic_coefficients* coef,Flags command_line_flags) {
+get_err_t GetCoefficients(Quadratic_coefficients* coef, const Flags* command_line_flags) {
     assert(coef != NULL);
+    assert(command_line_flags != NULL);
 
-    printf("Quadratic equations solver by " Color("Zotov Anton", YEL) "\n");
+    char output_str[MAX_OUTOUT_LENGTH];
+
+    sprintf(output_str, "Quadratic equations solver by " Color("Zotov Anton", YEL) "\n");
+    PrintAnimated(output_str, command_line_flags);
 
     Input_type_t input_type = CONSOLE_INPUT;
 
-    if (command_line_flags.file_input_flag & !command_line_flags.console_input_flag)
+    if (command_line_flags->file_input_flag & !command_line_flags->console_input_flag)
         input_type = FILE_INPUT;
-    else if (command_line_flags.console_input_flag & !command_line_flags.file_input_flag)
+    else if (command_line_flags->console_input_flag & !command_line_flags->file_input_flag)
         input_type = CONSOLE_INPUT;
     else
-        input_type = AskInputType();
+        input_type = AskInputType(command_line_flags);
 
     if (input_type == FILE_INPUT)
-        (void)FileRequestCoefficients(coef);
+        (void)FileRequestCoefficients(coef, command_line_flags);
     else if (input_type == CONSOLE_INPUT)
-        (void)RequestCoefficients(coef);
+        (void)RequestCoefficients(coef, command_line_flags);
     else
         exit(GET_INPUT_ERROR);
 
@@ -23,39 +27,51 @@ get_err_t GetCoefficients(Quadratic_coefficients* coef,Flags command_line_flags)
 }
 
 
-Input_type_t AskInputType() {
-    printf("Would you like to use file input from file? (write "
-           Color("Y", MAG) " or " Color("N", MAG) ")\n");
-    printf("If you write N it will be console input\n");
+Input_type_t AskInputType(const Flags* command_line_flags) {
+    assert(command_line_flags != NULL);
 
-    Answer_t ask_result = AskYesOrNo();
+    char output_str[MAX_OUTOUT_LENGTH];
+
+    sprintf(output_str, "Would you like to use file input from file? (write " Color("Y", MAG)
+           " or " Color("N", MAG) ")\n"
+           "If you write N it will be console input\n");
+    PrintAnimated(output_str, command_line_flags);
+
+    Answer_t ask_result = AskYesOrNo(command_line_flags);
     if (ask_result == YES)
         return FILE_INPUT;
     else if (ask_result == NO)
         return CONSOLE_INPUT;
     else {
-        printf("End of input file\n");
+        sprintf(output_str, "End of input file\n");
+        PrintAnimated(output_str, command_line_flags);
         return TYPE_ERROR;
     }
 }
 
 
-Freq_err_t FileRequestCoefficients(Quadratic_coefficients* coef) {
-    assert(coef != NULL); // TODO arguments of flags
-    assert(&coef->a != NULL); // TODO pass test file
+Freq_err_t FileRequestCoefficients(Quadratic_coefficients* coef, const Flags* command_line_flags) {
+    assert(command_line_flags != NULL);
+
+    char output_str[MAX_OUTOUT_LENGTH];
+
+    assert(coef != NULL);
+    assert(&coef->a != NULL);
     assert(&coef->b != NULL);
     assert(&coef->c != NULL);
-    assert(&coef->a != &coef->b && &coef->a != &coef->c && &coef->b != &coef->c); // TODO collect warnings
+    assert(&coef->a != &coef->b && &coef->a != &coef->c && &coef->b != &coef->c);
 
     Freq_err_t error_type = FREQ_NORMAL;
 
     while (1) {                                          // request the correct file unless input is possible to read 3 coefficients or program is closed
-        printf("Enter a filename like: " Color(DEFAULT_FILE, YEL)
+        sprintf(output_str, "Enter a filename like: " Color(DEFAULT_FILE, YEL)
                " (press " Color("Enter", MAG) " to use default file)" "\n");
+        PrintAnimated(output_str, command_line_flags);
 
-        char* filename = GetFilename();
+        char* filename = GetFilename(command_line_flags);
         if (filename == NULL) {
-            printf("End of input file\n");
+            sprintf(output_str, "End of input file\n");
+            PrintAnimated(output_str, command_line_flags);
             exit(FREQ_INPUT_ERROR);
         }
 
@@ -70,7 +86,8 @@ Freq_err_t FileRequestCoefficients(Quadratic_coefficients* coef) {
                 error_type = FREQ_INPUT_ERROR;
 
             if (ferror(coefficients_file)) {
-                printf("File " Color("%s", YEL) " - error during the reading\n", filename);
+                sprintf(output_str, "File " Color("%s", YEL) " - error during the reading\n", filename);
+                PrintAnimated(output_str, command_line_flags);
 
                 fclose(coefficients_file);
                 free(filename);
@@ -79,25 +96,31 @@ Freq_err_t FileRequestCoefficients(Quadratic_coefficients* coef) {
         }
 
         if (error_type != FREQ_NORMAL) {      // any error
-            if (error_type == FREQ_FOPEN_ERROR)
-                printf("File " Color("%s", YEL) " doesn't exist or you don't have \"r\" permission\n", filename);
-            if (error_type == FREQ_INPUT_ERROR)
-                printf(Color("FileRequestCoefficients", YEL) ": " Color("%s", YEL)
+            if (error_type == FREQ_FOPEN_ERROR) {
+                sprintf(output_str, "File " Color("%s", YEL) " doesn't exist or you don't have \"r\" permission\n", filename);
+                PrintAnimated(output_str, command_line_flags);
+            }
+            if (error_type == FREQ_INPUT_ERROR) {
+                sprintf(output_str, Color("FileRequestCoefficients", YEL) ": " Color("%s", YEL)
                        ": There must be three coefficients like: " Color("1 5 6", MAG) "\n", filename);
+                PrintAnimated(output_str, command_line_flags);
+            }
 
-            printf("Do you want to try again? (write " Color("Y", MAG) " if you do or "
+            sprintf(output_str, "Do you want to try again? (write " Color("Y", MAG) " if you do or "
                    Color("N", MAG) " otherwise)\n");
+            PrintAnimated(output_str, command_line_flags);
 
             fclose(coefficients_file);
             free(filename);
 
-            Answer_t ask_result = AskYesOrNo();
+            Answer_t ask_result = AskYesOrNo(command_line_flags);
             if (ask_result == YES)
                 continue;
             else if (ask_result == NO)
                 exit(FREQ_STOP_PROGRAM);
             else {
-                printf("End of input file\n");
+                sprintf(output_str, "End of input file\n");
+                PrintAnimated(output_str, command_line_flags);
                 exit(FREQ_INPUT_ERROR);
             }
         }
@@ -112,7 +135,11 @@ Freq_err_t FileRequestCoefficients(Quadratic_coefficients* coef) {
 }
 
 
-char* GetFilename() {
+char* GetFilename(const Flags* command_line_flags) {
+    assert(command_line_flags != NULL);
+
+    char output_str[MAX_OUTOUT_LENGTH];
+
     int got_symb = 0;
     char* filename = (char*) calloc(MAX_FILENAME_LENGTH, sizeof(char));
     assert(filename != NULL);
@@ -144,23 +171,28 @@ char* GetFilename() {
         }
 
         ClearInputBuf();
-        printf("Enter a filename like: " Color(DEFAULT_FILE, YEL) "\n");
+        sprintf(output_str, "Enter a filename like: " Color(DEFAULT_FILE, YEL) "\n");
+        PrintAnimated(output_str, command_line_flags);
     }
 }
 
 
-Req_err_t RequestCoefficients(Quadratic_coefficients* coef) {
+Req_err_t RequestCoefficients(Quadratic_coefficients* coef, const Flags* command_line_flags) {
     assert(coef != NULL);
+    assert(command_line_flags != NULL);
     assert(&coef->a != NULL);
     assert(&coef->b != NULL);
     assert(&coef->c != NULL);
     assert(&coef->a != &coef->b && &coef->a != &coef->c && &coef->b != &coef->c);
 
+    char output_str[MAX_OUTOUT_LENGTH];
+
     int first_symb = 0;
 
     while (1) {                          // request the introduction of coefficients unless input is correct or program is closed
-        printf("Enter the coefficients coef_a, coef_b, coef_c like: " Color("1 5 6", MAG)
+        sprintf(output_str, "Enter the coefficients coef_a, coef_b, coef_c like: " Color("1 5 6", MAG)
                " (press " Color("Enter", MAG) " to use coefficients from example)" "\n");
+        PrintAnimated(output_str, command_line_flags);
 
         if((first_symb = getchar()) == '\n'){
             coef->a = 1;
@@ -174,31 +206,39 @@ Req_err_t RequestCoefficients(Quadratic_coefficients* coef) {
         if (scanf("%lf %lf %lf", &coef->a, &coef->b, &coef->c) != 3) {  // TODO think
             ClearInputBuf();             // clear the input buffer from excess symbols
 
-            printf(Color("RequestCoefficients:", YEL) "There must be three coefficients like: "
-                   Color("1 2 1", MAG) "\n");
-            printf("Do you want to try again? (write " Color("Y", MAG) " if you do or "
+            sprintf(output_str, Color("RequestCoefficients:", YEL) "There must be three coefficients like: "
+                   Color("1 2 1", MAG) "\n"
+                   "Do you want to try again? (write " Color("Y", MAG) " if you do or "
                    Color("N", MAG) " otherwise)\n");
+            PrintAnimated(output_str, command_line_flags);
 
-            Answer_t ask_result = AskYesOrNo();
+            Answer_t ask_result = AskYesOrNo(command_line_flags);
             if (ask_result == YES)
                 continue;
             else if (ask_result == NO)
                 exit(REQ_STOP_PROGRAM);
             else {
-                printf("End of input file\n");
+                sprintf(output_str, "End of input file\n");
+                PrintAnimated(output_str, command_line_flags);
                 exit(REQ_INPUT_ERROR);
             }
 
         }
-        else /* number of arguments is 3 => input is correct */
+        else { /* number of arguments is 3 => input is correct */
+            ClearInputBuf();
             break;
+        }
     }
 
     return REQ_NORMAL;
 }
 
 
-Answer_t AskYesOrNo() {
+Answer_t AskYesOrNo(const Flags* command_line_flags) {
+    assert(command_line_flags != NULL);
+
+    char output_str[MAX_OUTOUT_LENGTH];
+
     int got_symb = 0;
     Answer_t result = NONE;
     bool clear = true;
@@ -225,7 +265,8 @@ Answer_t AskYesOrNo() {
         if (clear)
             ClearInputBuf();
 
-        printf("PLease write " Color("Y", MAG) " or " Color("N", MAG) "\n");
+        sprintf(output_str, "PLease write " Color("Y", MAG) " or " Color("N", MAG) "\n");
+        PrintAnimated(output_str, command_line_flags);
     }
 }
 

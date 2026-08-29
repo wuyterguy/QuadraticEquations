@@ -1,0 +1,6 @@
+-f - set file input
+-c - set console input
+-t - on testing
+-h - show help list
+-g - on drawing graphic
+-a - on animated output

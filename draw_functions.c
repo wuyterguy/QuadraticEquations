@@ -68,44 +68,44 @@ void DrawGraphic(const Quadratic_coefficients* coef, const Position_parameters* 
     assert(position != NULL);
     assert(Derivative);
 
-    Axis_scale axis_sc = {};
-    GetAxisScale(coef, position, &axis_sc);
+    Axis_scale axes_sc = {};
+    GetAxisScale(coef, position, &axes_sc);
 
     MakeBlackWindow();
 
     CancelConsolePrinting();
 
-    DrawGrid(&axis_sc);
+    DrawGrid(&axes_sc);
 
-    DrawAxis(&axis_sc, position);
+    DrawAxis(&axes_sc, position);
 
     DrawCurve(coef, position, Derivative);
 }
 
 
 void GetAxisScale(const Quadratic_coefficients* coef, const Position_parameters* position,
-                  Axis_scale* axis_sc) {
+                  Axis_scale* axes_sc) {
     assert(coef != NULL);
     assert(position != NULL);
-    assert(axis_sc != NULL);
+    assert(axes_sc != NULL);
 
-    double x_vertex_value = -coef->b / 2.0 / coef->a;
+    double x_vertex_value = -coef->b / 2.0 / coef->a; // TODO get x_vertex value in get position
     double sc_div_x = WINDOW_SIZE_X / SCALE_DIVISION_COUNT_X / position->scale_x;
     double sc_div_y = WINDOW_SIZE_Y / SCALE_DIVISION_COUNT_Y / position->scale_y;
     double processed_sc_div_x = 1.0;
     double processed_sc_div_y = 1.0;
-    double decimal_place_x = GetPlace(sc_div_x, &processed_sc_div_x);            //processed_sc_div_x is being changed to 0.5/1.0/2.0
-    double decimal_place_y = GetPlace(sc_div_y, &processed_sc_div_y);            //processed_sc_div_y is being changed to 0.5/1.0/2.0
+    double decimal_place_x = Place(sc_div_x, &processed_sc_div_x);            //processed_sc_div_x is being changed to 0.5/1.0/2.0
+    double decimal_place_y = Place(sc_div_y, &processed_sc_div_y);            //processed_sc_div_y is being changed to 0.5/1.0/2.0
 
-    axis_sc->dgt_step_x = processed_sc_div_x * pow(10.0, decimal_place_x);
-    axis_sc->pxl_step_x = axis_sc->dgt_step_x * position->scale_x;
-    axis_sc->anchor_value_x = floor(x_vertex_value / axis_sc->dgt_step_x) * axis_sc->dgt_step_x;
-    axis_sc->anchor_point_x = position->pxl_vertex_x - (x_vertex_value - axis_sc->anchor_value_x) * position->scale_x;
+    axes_sc->dgt_step_x = processed_sc_div_x * pow(10.0, decimal_place_x);
+    axes_sc->pxl_step_x = axes_sc->dgt_step_x * position->scale_x;
+    axes_sc->anchor_value_x = floor(x_vertex_value / axes_sc->dgt_step_x) * axes_sc->dgt_step_x;
+    axes_sc->anchor_point_x = position->pxl_vertex_x - (x_vertex_value - axes_sc->anchor_value_x) * position->scale_x;
 
-    axis_sc->dgt_step_y = processed_sc_div_y * pow(10.0, decimal_place_y);
-    axis_sc->pxl_step_y = axis_sc->dgt_step_y * position->scale_y;
-    axis_sc->anchor_value_y = 0.0;
-    axis_sc->anchor_point_y = position->abscissa_position;
+    axes_sc->dgt_step_y = processed_sc_div_y * pow(10.0, decimal_place_y);
+    axes_sc->pxl_step_y = axes_sc->dgt_step_y * position->scale_y;
+    axes_sc->anchor_value_y = 0.0;
+    axes_sc->anchor_point_y = position->abscissa_position;
 }
 
 
@@ -124,20 +124,20 @@ void CancelConsolePrinting() {
 }
 
 
-void DrawGrid(const Axis_scale* axis_sc) {
-    assert(axis_sc != NULL);
+void DrawGrid(const Axis_scale* axes_sc) {
+    assert(axes_sc != NULL);
 
-    double small_square_step_x = axis_sc->pxl_step_x / SHORT_HATCH_PER_LONG;
-    double small_square_step_y = axis_sc->pxl_step_y / SHORT_HATCH_PER_LONG;
+    double small_square_step_x = axes_sc->pxl_step_x / SHORT_HATCH_PER_LONG;
+    double small_square_step_y = axes_sc->pxl_step_y / SHORT_HATCH_PER_LONG;
 
     txSetColor(RGB(50, 40, 55), GRID_THICKNESS);                                     // small square
-    DoXYAcrossEntireScreenRange(pixel, axis_sc->anchor_point_, small_square_step_,
+    DoXYAcrossEntireScreenRange(pixel, axes_sc->anchor_point_, small_square_step_,
         txLine(point_x, 0.0, point_x, WINDOW_SIZE_Y);,
         txLine(0.0, point_y, WINDOW_SIZE_X, point_y);
     );
 
     txSetColor(RGB(65, 55, 70), GRID_THICKNESS);                                     // big square
-    DoXYAcrossEntireScreenRange(pixel, axis_sc->anchor_point_, axis_sc->pxl_step_,
+    DoXYAcrossEntireScreenRange(pixel, axes_sc->anchor_point_, axes_sc->pxl_step_,
         txLine(point_x, 0.0, point_x, WINDOW_SIZE_Y);,
         txLine(0.0, point_y, WINDOW_SIZE_X, point_y);
     );
@@ -145,8 +145,8 @@ void DrawGrid(const Axis_scale* axis_sc) {
 
 
 #define DrawAbscissaHatches(condition, sign_1, sign_2)                                                                                       \
-    value_x = axis_sc->anchor_value_x;                                                                                                       \
-    for (pixel point_x = axis_sc->anchor_point_x; condition; point_x sign_1##= axis_sc->pxl_step_x, value_x sign_2##= axis_sc->dgt_step_x) { \
+    value_x = axes_sc->anchor_value_x;                                                                                                       \
+    for (pixel point_x = axes_sc->anchor_point_x; condition; point_x sign_1##= axes_sc->pxl_step_x, value_x sign_2##= axes_sc->dgt_step_x) { \
         if (!(CmpEpsPrec(value_x, 0.0))) {                                                                                                   \
             txLine(point_x, position->abscissa_position - LONG_HATCH_SIZE, point_x, position->abscissa_position + LONG_HATCH_SIZE);          \
             sprintf(value_str, "%lg", value_x);                                                                                              \
@@ -158,28 +158,28 @@ void DrawGrid(const Axis_scale* axis_sc) {
     }
 
 #define DrawOrdinateHatches(condition, sign_1, sign_2)                                                                                       \
-    value_y = axis_sc->anchor_value_y;                                                                                                       \
-    for (pixel point_y = axis_sc->anchor_point_y; condition; point_y sign_1##= axis_sc->pxl_step_y, value_y sign_2##= axis_sc->dgt_step_y) { \
+    value_y = axes_sc->anchor_value_y;                                                                                                       \
+    for (pixel point_y = axes_sc->anchor_point_y; condition; point_y sign_1##= axes_sc->pxl_step_y, value_y sign_2##= axes_sc->dgt_step_y) { \
         txLine(position->ordinate_position - LONG_HATCH_SIZE, point_y, position->ordinate_position + LONG_HATCH_SIZE, point_y);              \
         sprintf(value_str, "%lg", value_y);                                                                                                  \
         txTextOut(position->ordinate_position + OFFSET * offsetDirection, point_y + TEXT_SIZE / 2, value_str);                               \
     }
 
-void DrawAxis(const Axis_scale* axis_sc, const Position_parameters* position) {
-    assert(axis_sc != NULL);
+void DrawAxis(const Axis_scale* axes_sc, const Position_parameters* position) {
+    assert(axes_sc != NULL);
     assert(position != NULL);
 
-    char value_str[MAX_NUMBER_SIZE] = {};
+    char value_str[MAX_NUMBER_LENGTH] = {};
 
-    txSetColor(TX_YELLOW, AXIS_THICKNESS);                                           // axis
+    txSetColor(TX_YELLOW, AXIS_THICKNESS);                                           // axes
     txLine(0.0, position->abscissa_position, WINDOW_SIZE_X, position->abscissa_position);
     txLine(position->ordinate_position, 0.0, position->ordinate_position, WINDOW_SIZE_Y);
 
-    double small_square_step_x = axis_sc->pxl_step_x / SHORT_HATCH_PER_LONG;
-    double small_square_step_y = axis_sc->pxl_step_y / SHORT_HATCH_PER_LONG;
+    double small_square_step_x = axes_sc->pxl_step_x / SHORT_HATCH_PER_LONG;
+    double small_square_step_y = axes_sc->pxl_step_y / SHORT_HATCH_PER_LONG;
 
     txSetColor(TX_MAGENTA, SHORT_HATCH_THICKNESS);                                   // short hatches
-    DoXYAcrossEntireScreenRange(pixel, axis_sc->anchor_point_, small_square_step_,
+    DoXYAcrossEntireScreenRange(pixel, axes_sc->anchor_point_, small_square_step_,
         txLine(point_x, position->abscissa_position - SHORT_HATCH_SIZE, point_x, position->abscissa_position + SHORT_HATCH_SIZE);,
         txLine(position->ordinate_position - SHORT_HATCH_SIZE, point_y, position->ordinate_position + SHORT_HATCH_SIZE, point_y);
     );
@@ -253,7 +253,7 @@ double QuadraticEqualDerivative (const Quadratic_coefficients* coef, const pixel
 }
 
 
-double GetPlace(double full, double* p_mantissa) {
+double Place(double full, double* p_mantissa) {
     assert(p_mantissa != NULL);
 
     double place = 0.0;
@@ -271,12 +271,12 @@ double GetPlace(double full, double* p_mantissa) {
         }
     }
 
-    *p_mantissa = GetClosest05_1_2(full);     // TODO print x, unit and y, unit on graphic
+    *p_mantissa = Closest05_1_2(full); // TODO print x, unit and y, unit on graphic
     return place;
 }
 
 
-double GetClosest05_1_2(const double x) {
+double Closest05_1_2(const double x) {
     if (x >= 0.71 && x <= 1.41)
         return 1.0;
     else if (x < 0.71)

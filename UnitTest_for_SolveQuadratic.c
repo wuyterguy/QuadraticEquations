@@ -1,9 +1,13 @@
-int RunFileTests() {
+int RunFileTests(const Flags* command_line_flags) {
+    assert(command_line_flags != NULL);
+
+    char output_str[MAX_OUTOUT_LENGTH];
+
     FILE* tests_file = fopen(TESTFILE, "r");
 
     if (tests_file == NULL) {
         fclose(tests_file);
-        PrintErrorMessage(FTEST_FOPEN_ERROR, 0);
+        PrintErrorMessage(FTEST_FOPEN_ERROR, 0, command_line_flags);
         exit(FTEST_FOPEN_ERROR);
     }
 
@@ -50,18 +54,19 @@ int RunFileTests() {
     }
 
     if (ferror(tests_file))
-        error_type = FTEST_FOPEN_ERROR;
+        error_type = FTEST_READ_ERROR;
 
     fclose(tests_file);
     if (error_type != FTEST_NORMAL) {
-        PrintErrorMessage(error_type, tests_count);
+        PrintErrorMessage(error_type, tests_count, command_line_flags);
         exit(error_type);
     }
 
     int ftest_result = successful_tests * HUNDRED_PERCENT / tests_count;
     if (ftest_result < HUNDRED_PERCENT) {
-        printf("SolveQuadratic: testing failed\n");
-        printf(Color("%d%%", MAG) " successful file tests\n", ftest_result);
+        sprintf(output_str, "SolveQuadratic: testing failed\n"
+               Color("%d%%", MAG) " successful file tests\n", ftest_result);
+        PrintAnimated(output_str, command_line_flags);
         exit(MAIN_NORMAL);
     }
 
@@ -69,20 +74,29 @@ int RunFileTests() {
 }
 
 
-void PrintErrorMessage(const Ftest_err_t error_type, const int test_number) {
+void PrintErrorMessage(const Ftest_err_t error_type, const int test_number,
+                       const Flags* command_line_flags) {
+    assert(command_line_flags != NULL);
+
+    char output_str[MAX_OUTOUT_LENGTH];
+
     if (error_type == FTEST_FOPEN_ERROR) {
-        printf("File " Color(TESTFILE, YEL) " doesn't exist or you don't have \"r\" permission\n");
+        sprintf(output_str, "File " Color(TESTFILE, YEL) " doesn't exist or you don't have \"r\" permission\n");
+        PrintAnimated(output_str, command_line_flags);
     }
     if (error_type == FTEST_INPUT_ERROR) {
-        printf(Color("RunFileTest", YEL) ": " Color(TESTFILE, YEL) ": test "
+        sprintf(output_str, Color("RunFileTest", YEL) ": " Color(TESTFILE, YEL) ": test "
                Color("%d", MAG) ": There must be four - six numbers like: " Color("1 2 1 1 -1", MAG) "\n", test_number);
+        PrintAnimated(output_str, command_line_flags);
     }
     if (error_type == FTEST_EXP_NROOT_ERROR) {
-        printf(Color("RunFileTest", YEL) ": " Color(TESTFILE, YEL) ": test "
+        sprintf(output_str, Color("RunFileTest", YEL) ": " Color(TESTFILE, YEL) ": test "
                Color("%d", MAG) ": There must be value of type Roots_c_t like: " Color("1 2 1 >1< -1", MAG) "\n", test_number);
+        PrintAnimated(output_str, command_line_flags);
     }
     if (error_type == FTEST_READ_ERROR) {
-        printf("File " Color(TESTFILE, YEL) " - error during the reading\n");
+        sprintf(output_str, "File " Color(TESTFILE, YEL) " - error during the reading\n");
+        PrintAnimated(output_str, command_line_flags);
     }
 }
 
