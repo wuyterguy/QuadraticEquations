@@ -3,9 +3,9 @@
 #include <stdlib.h>  // TODO clear output
 #include <string.h>  // TODO arguments of flags
 #include <math.h>    // TODO collect warnings
-#include <ctype.h>   /// TODO doc
+#include <ctype.h>   /// TODO linear graphic
 
-#define HELPFILE "help.txt" /// TODO linear graphic
+#define HELPFILE "help.txt"
 #define OUTPUT_SLOW_DELAY 25.0
 #define OUTPUT_FAST_DELAY 15.0
 #define MAX_OUTOUT_LENGTH 200
@@ -160,7 +160,13 @@ Help_err_t ShowHelplist(const Flags* command_line_flags);
 Print_err_t PrintRoots(Roots_c_t n_roots, const double root_1, const double root_2,
                        const Flags* command_line_flags);
 
-void PrintAnimated(const char* output_str, const Flags* command_line_flags); // TODO d
+/**
+ * @brief do animated print if there is animated_output_flag or do simple print
+ *
+ * @param[in] output_str         line for output
+ * @param[in] command_line_flags pointer to stract with flags
+ */
+void PrintAnimated(const char* output_str, const Flags* command_line_flags);
 
 //____________________UnitTest_for_SolveQuadratic____________________
 /**
