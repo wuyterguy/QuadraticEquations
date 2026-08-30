@@ -1,0 +1,5 @@
+*.exe
+*.sh
+*.ps1
+
+coefficients.txt

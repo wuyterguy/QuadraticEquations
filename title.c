@@ -1,5 +1,5 @@
 #include "TXLib.h"   /// TODO README
-#include <stdio.h>   // TODO pass test file
+#include <stdio.h>
 #include <stdlib.h>  // TODO clear output
 #include <string.h>  // TODO arguments of flags
 #include <math.h>    // TODO collect warnings

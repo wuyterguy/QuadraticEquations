@@ -27,11 +27,11 @@ This program is designed to solve quadratic equations. User has to provide coeff
 
 #### features
 
-* The program supports input from the console and from file. You can set the mod by command line flag or the program ask you about it at runtime.
+* The program supports input from the console and from file. You can set the mod by command line flag (hereinafter referred to as CLF) or the program ask you about it at runtime.
 * The program capable of printing with a typewriter effect.
-* It is possible to conduct testing of function that calculate the roots at start of program launch.
+* It is possible to conduct testing of function that calculate the roots at start of program launch. Failed tested are put in file with failed tests.
 * Contains a function that plots a graph of a quadratic equation.
-* There is color printing.
+* Supports color printing.
 
 ---
 
@@ -67,19 +67,19 @@ __launch__
 User has to compile "___main.c___" by __c++__ compiler and run resulting file to launch the program.
 
 __program options__
-* Use command line flag (hereinafter referred to as CLF) ___-c___ or ___-f___
+* Use CLF ___-c___ or ___-f___
 to set console or file input respectively.
 if you specify both flags program will ask you to set input at runtime.
 * Use CLF ___-a___
 to activate printing with typewriter effect.
 * Use CLF ___-t___
-to conduct preliminary testing using tests from file specified by macro ___TESTFILE___.
+to conduct preliminary testing using tests from file specified by macro ___TESTFILE___ and put failed tests in file specified by macro ___FAILED_TESTS_FILE___.
 * Use CLF ___-g___
 to see a graphic of the quadratic equation with entered coefficients at the end.
 * Change value of macro ___COLOR_SWITCH___ to ___ON___ or ___OFF___ to switch color printing
 
 __for developers__
-all function are documented in the file "title.c" using _doxygen_ syntax
+all functions are documented using _doxygen_ syntax in the file "___title.c___"
 
 ---
 
@@ -111,7 +111,6 @@ for work with symbols (_isalpha_, etc.)
 
 #### to do
 
-* After testing make 3 files: with successful tests, with failed test and with runtime error tests
 * Don't stop the program in case of an error but remember the error and return bit number containing information about all the error incidents
 * Add arguments to certain flags where appropriate
 * Clear output
