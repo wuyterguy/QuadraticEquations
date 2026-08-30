@@ -1,39 +1,43 @@
-<<h1 align="center"> quadratic equations </h1>
+<<h2 align="center"> quadratic equations </h2>
 
 ---
 
 <span style="font-size: 18px;">
 
-### table of contents
+#### table of contents
 
 * [overview](#overview)
 * [features](#features)
 * [demonstration](#demonstration)
 * [option management](#usage)
 * [used tools](#libraries)
+* [to do](#todo)
 
 ---
 
-#### overview
 <a id="overview"></a>
+
+#### overview
 
 This program is designed to solve quadratic equations. User has to provide coefficients of quadratic equation to the program, and it outputs the roots.
 
 ---
 
-#### features
 <a id="features"></a>
 
+#### features
+
 * The program supports input from the console and from file. You can set the mod by command line flag or the program ask you about it at runtime.
-* The program capable of printing with a type writer effect.
+* The program capable of printing with a typewriter effect.
 * It is possible to conduct testing of function that calculate the roots at start of program launch.
 * Contains a function that plots a graph of a quadratic equation.
 * There is color printing.
 
 ---
 
+<a id="demonstration"></a>
+
 #### demonstration
-<a id="features"></a>
 
 * __console input__
 
@@ -45,7 +49,7 @@ This program is designed to solve quadratic equations. User has to provide coeff
 ![file_input.png](file_input.png)
 
 
-* __testing__ (in example expected value is incorrect)
+* __testing__ (expected value in example is incorrect)
 
 ![testing.png](testing.png)
 
@@ -55,8 +59,9 @@ This program is designed to solve quadratic equations. User has to provide coeff
 
 ---
 
-#### usage
 <a id="usage"></a>
+
+#### option management
 
 __launch__
 User has to compile "___main.c___" by __c++__ compiler and run resulting file to launch the program.
@@ -78,6 +83,8 @@ all function are documented in the file "title.c" using _doxygen_ syntax
 
 ---
 
+<a id="libraries"></a>
+
 #### used tools
 
 __libraries__
@@ -90,9 +97,22 @@ for basic functions (_printf_, _fopen_, etc.)
 * __stdlib.h__
 for basic functions (_calloc_)
 * __string.h__
-for work with string (_strncpy_)
+for work with strings (_strncpy_)
 * __math.h__
 for mathematical operations (_sqrt_)
 * __ctype.h__
+for work with symbols (_isalpha_, etc.)
 
 </span>
+
+---
+
+<a id="todo"></a>
+
+#### to do
+
+* After testing make 3 files: with successful tests, with failed test and with runtime error tests
+* Don't stop the program in case of an error but remember the error and return bit number containing information about all the error incidents
+* Add arguments to certain flags where appropriate
+* Clear output
+* Add ability to skip slow output (typewriter effect)

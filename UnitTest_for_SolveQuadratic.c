@@ -6,8 +6,17 @@ int RunFileTests(const Flags* command_line_flags) {
     FILE* tests_file = fopen(TESTFILE, "r");
 
     if (tests_file == NULL) {
+        sprintf(output_str, "File " Color(TESTFILE, YEL) " doesn't exist or you don't have \"r\" permission\n");
+        PrintAnimated(output_str, command_line_flags);
+        exit(FTEST_FOPEN_ERROR);
+    }
+
+    FILE* failed_tests_file = fopen(FAILED_TESTS_FILE, "w");
+
+    if (failed_tests_file == NULL) {
         fclose(tests_file);
-        PrintErrorMessage(FTEST_FOPEN_ERROR, 0, command_line_flags);
+        sprintf(output_str, "File " Color(TESTFILE, YEL) " - you don't have \"w\" permission\n");
+        PrintAnimated(output_str, command_line_flags);
         exit(FTEST_FOPEN_ERROR);
     }
 
@@ -50,13 +59,18 @@ int RunFileTests(const Flags* command_line_flags) {
             break;
         }
 
-        successful_tests += RunTest(&coef, exp, tests_count);
+        if (RunTest(&coef, exp, tests_count))
+            successful_tests++;
+        else
+            fputs(line, failed_tests_file);
     }
 
     if (ferror(tests_file))
         error_type = FTEST_READ_ERROR;
 
     fclose(tests_file);
+    fclose(failed_tests_file);
+
     if (error_type != FTEST_NORMAL) {
         PrintErrorMessage(error_type, tests_count, command_line_flags);
         exit(error_type);
@@ -80,10 +94,6 @@ void PrintErrorMessage(const Ftest_err_t error_type, const int test_number,
 
     char output_str[MAX_OUTOUT_LENGTH];
 
-    if (error_type == FTEST_FOPEN_ERROR) {
-        sprintf(output_str, "File " Color(TESTFILE, YEL) " doesn't exist or you don't have \"r\" permission\n");
-        PrintAnimated(output_str, command_line_flags);
-    }
     if (error_type == FTEST_INPUT_ERROR) {
         sprintf(output_str, Color("RunFileTest", YEL) ": " Color(TESTFILE, YEL) ": test "
                Color("%d", MAG) ": There must be four - six numbers like: " Color("1 2 1 1 -1", MAG) "\n", test_number);

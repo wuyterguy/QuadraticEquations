@@ -12,6 +12,7 @@
 #define MAX_TEST_LINE_LENGTH 200
 #define HUNDRED_PERCENT 100
 #define TESTFILE "tests_for_SolveQuadratic.txt"
+#define FAILED_TESTS_FILE "failed_tests.txt"
 #define DEFAULT_FILE "coefficients.txt"
 #define MAX_FILENAME_LENGTH 100
 #define EPSILON 0.00001                                                         // comparison accuracy
