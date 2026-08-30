@@ -75,9 +75,8 @@ Help_err_t ShowHelplist(const Flags* command_line_flags) {
     int current_symbol = 0;
     while (((current_symbol = getc(help_file)) != '\0') && (current_symbol != EOF)) {
         putchar(current_symbol);
-        if (command_line_flags->animated_output_flag) {
+        if (command_line_flags->animated_output_flag)
             txSleep(OUTPUT_FAST_DELAY);
-        }
     }
 
     if (ferror(help_file)){

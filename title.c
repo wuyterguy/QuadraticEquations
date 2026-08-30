@@ -3,9 +3,9 @@
 #include <stdlib.h>  // TODO clear output
 #include <string.h>  // TODO arguments of flags
 #include <math.h>    // TODO collect warnings
-#include <ctype.h>   /// TODO linear graphic
+#include <ctype.h>   /// TODO if click enter or other key it will be skiped for current print
 
-#define HELPFILE "help.txt"    /// TODO if click enter or other key it will be skiped for current print
+#define HELPFILE "help.txt"
 #define OUTPUT_SLOW_DELAY 25.0       // milliseconds
 #define OUTPUT_FAST_DELAY 15.0       // milliseconds
 #define MAX_OUTOUT_LENGTH 200
